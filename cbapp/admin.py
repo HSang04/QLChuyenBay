@@ -193,7 +193,7 @@ class ChuyenBayAdmin(ModelView):
             if gio_di >= gio_den:
                 raise ValidationError("Giờ đi phải trước giờ đến.")
 
-            print(f"Kiểm tra với máy bay {may_bay.tenMayBay}, thời gian từ {gio_di} đến {gio_den}")
+
 
 
             existing_flights = ChuyenBay.query.filter(ChuyenBay.maMayBay == may_bay.maMayBay).all()
@@ -203,14 +203,10 @@ class ChuyenBayAdmin(ModelView):
                 existing_flights = [flight for flight in existing_flights if flight.maChuyenBay != model.maChuyenBay]
 
 
-            print("Các chuyến bay đã có của máy bay:")
-            for flight in existing_flights:
-                print(f"Chuyến bay {flight.maChuyenBay}: {flight.mayBay.tenMayBay} từ {flight.gioDi} đến {flight.gioDen}")
+
 
 
             for flight in existing_flights:
-                print(f"Đang kiểm tra chuyến bay: {flight.mayBay.tenMayBay} từ {flight.gioDi} đến {flight.gioDen}")
-
                 if not (gio_den <= flight.gioDi or gio_di >= flight.gioDen):
                     raise ValidationError(
                         f"Máy bay '{may_bay.tenMayBay}' đã được sử dụng trong chuyến bay từ {flight.gioDi} đến {flight.gioDen}. Vui lòng chọn thời gian khác.")
