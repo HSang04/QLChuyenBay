@@ -22,7 +22,7 @@ def login_process():
 
         if user:
             login_user(user)  # Flask-Login sẽ lưu ID người dùng vào session
-            print(f"User logged in: {user}")
+
 
             if isinstance(user, NhanVien):
                 if user.vaiTro == 'BANVE':

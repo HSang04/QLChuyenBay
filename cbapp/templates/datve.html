@@ -3,7 +3,7 @@
 {% block title %}Đặt Vé Chuyến Bay{% endblock %}
 
 {% block content %}
-<!-- Thông báo nếu có -->
+
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         <div class="container mt-3">
@@ -16,7 +16,7 @@
     {% endif %}
 {% endwith %}
 
-<!-- Form Đặt Vé -->
+
 <div class="container mt-5">
     <h2 class="text-center">Đặt Vé Chuyến Bay</h2>
 
@@ -32,7 +32,7 @@
                     <form method="POST">
                         <!-- Hiển thị giá vé 1 vé -->
                         <div class="mb-3">
-                            <label for="gia_ve" class="form-label">Giá vé 1 vé</label>
+                            <label class="form-label">Giá vé 1 vé</label>
                             <div>
                                 <p><strong>Phổ thông:</strong> {{ gia_ve_pho_thong }} VND</p>
                                 <p><strong>Thương gia:</strong> {{ gia_ve_thuong_gia }} VND</p>

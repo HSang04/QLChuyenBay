@@ -33,7 +33,7 @@ class KhachHangAdmin(ModelView):
 
 
 class TuyenBayAdmin(ModelView):
-    form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
+    form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen','giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
     column_list = ['maTuyenBay', 'tenTuyenBay', 'maSanBayDi', 'maSanBayDen']
     can_export = True
     column_searchable_list = ['tenTuyenBay']
