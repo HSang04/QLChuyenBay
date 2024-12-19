@@ -1,21 +1,21 @@
-from enum import Enum
-
 # models.py
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, DateTime, Enum
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime, timedelta
+from enum import Enum as RoleEnum, unique
 
 from cbapp import app, db, create_db
 
 
-class VaiTro(Enum):
+class VaiTro(RoleEnum):
     QUANTRI = 'Quản trị'
     BANVE = 'Bán vé'
+
 
 class KhachHang(db.Model, UserMixin):
     __tablename__ = 'khachhang'
@@ -46,7 +46,7 @@ class NhanVien(db.Model, UserMixin):
     tenNhanVien = Column(String(50), nullable=False)
     soDienThoai = Column(String(12), nullable=False)
     email = Column(String(50), unique=True, nullable=False)
-    vaiTro = Column(String(50), nullable=False)
+    vaiTro = Column(Enum(VaiTro), default=VaiTro.BANVE)
     taiKhoan = Column(String(30), unique=True, nullable=False)
     matKhau = Column(String(255), nullable=False)
 
@@ -99,6 +99,7 @@ class MayBay(db.Model):
     gheHang1 = db.Column(db.Integer, nullable=False)
     gheHang2 = db.Column(db.Integer, nullable=False)
 
+
 class Ghe(db.Model):
     __tablename__ = 'ghe'
     maGhe = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -108,8 +109,6 @@ class Ghe(db.Model):
     maMayBay = db.Column(db.Integer, db.ForeignKey('maybay.maMayBay'), nullable=False)
 
     mayBay = db.relationship('MayBay', backref=db.backref('ghe', lazy=True))
-
-
 
 
 class ChuyenBay(db.Model):
@@ -125,7 +124,6 @@ class ChuyenBay(db.Model):
     mayBay = db.relationship('MayBay',foreign_keys=[maMayBay], backref='tenmb', lazy='select')
 
     ves = relationship('Ve', backref='chuyenBay', cascade="all, delete-orphan")
-
 
     def tinh_gia_ve(self, loai_ve, ngay_dat):
         gia_ve = self.tuyenBay.giaCoBan
@@ -209,15 +207,15 @@ if __name__ == '__main__':
 
 
         nhanVien1 = NhanVien(tenNhanVien="Trần Huỳnh Sang", soDienThoai="0901234567",
-                             email="lequangd@example.com", vaiTro="QUANTRI", taiKhoan="admin01")
+                             email="lequangd@example.com", vaiTro=VaiTro.QUANTRI, taiKhoan="admin01")
         nhanVien1.set_password("123456")
 
         nhanVien2 = NhanVien(tenNhanVien="Phạm Thu E", soDienThoai="0932123456",
-                             email="phamthue@example.com", vaiTro="BANVE", taiKhoan="admin02")
+                             email="phamthue@example.com", vaiTro=VaiTro.BANVE, taiKhoan="admin02")
         nhanVien2.set_password("123456")
 
         nhanVien3 = NhanVien(tenNhanVien="Nguyễn Duy F", soDienThoai="0943234567",
-                             email="nguyenduyf@example.com", vaiTro="BANVE", taiKhoan="admin03")
+                             email="nguyenduyf@example.com", vaiTro=VaiTro.BANVE, taiKhoan="admin03")
         nhanVien3.set_password("123456")
 
         db.session.add_all([nhanVien1, nhanVien2, nhanVien3])
@@ -231,6 +229,4 @@ if __name__ == '__main__':
 
 
         db.session.commit()
-
-
 

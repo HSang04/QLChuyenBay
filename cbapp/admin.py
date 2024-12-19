@@ -1,11 +1,12 @@
 from datetime import datetime
 
 # admin.py
-from flask import app, flash
-from flask_admin import Admin
-from flask_admin.contrib.sqla import ModelView
+from flask import app, flash, redirect
+from flask_admin import Admin, expose, BaseView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import Select2Widget, DateTimePickerWidget
+from flask_login import current_user, logout_user
+from werkzeug.security import generate_password_hash
 from wtforms import Form, StringField, SelectField, form
 from wtforms.fields.choices import SelectMultipleField
 from wtforms.validators import DataRequired
@@ -19,20 +20,37 @@ from wtforms import SelectField
 admin = Admin(app=app, name='Quản trị chuyến bay', template_mode='bootstrap4')
 
 
-class NhanVienAdmin(ModelView):
+class AdminView(ModelView):
+    def is_accessible(self):
+        return current_user.is_authenticated and current_user.vaiTro.__eq__(VaiTro.QUANTRI)
+
+
+class NhanVienAdmin(AdminView):
     column_list = ['tenNhanVien', 'email', 'soDienThoai','vaiTro']
     form_choices = {
         'vaiTro': [(v.name, v.value) for v in VaiTro]}
 
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.active = True
 
-class KhachHangAdmin(ModelView):
+            if 'matKhau' in form and form.matKhau.data:
+                model.matKhau = generate_password_hash(form.matKhau.data)
+        super(NhanVienAdmin, self).on_model_change(form, model, is_created)
+
+
+class KhachHangAdmin(AdminView):
     column_list = ['hoVaTen', 'email', 'soDienThoai','active']
+    def on_model_change(self, form, model, is_created):
+        if is_created:
+            model.active = True
+
+            if 'matKhau' in form and form.matKhau.data:
+                model.matKhau = generate_password_hash(form.matKhau.data)
+        super(KhachHangAdmin, self).on_model_change(form, model, is_created)
 
 
-
-
-
-class TuyenBayAdmin(ModelView):
+class TuyenBayAdmin(AdminView):
     form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen','giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
     column_list = ['maTuyenBay', 'tenTuyenBay', 'maSanBayDi', 'maSanBayDen']
     can_export = True
@@ -127,7 +145,8 @@ class TuyenBayAdmin(ModelView):
         if form.sanBayTrungGian2.data:
             model.maSanBayTrungGian2 = form.sanBayTrungGian2.data.maSanBay
 
-class SanBayAdmin(ModelView):
+
+class SanBayAdmin(AdminView):
     column_list = ['maSanBay', 'tenSanBay']
     form_columns = ['maSanBay','tenSanBay']
     can_export = True
@@ -136,8 +155,7 @@ class SanBayAdmin(ModelView):
     page_size = 10
 
 
-
-class MayBayAdmin(ModelView):
+class MayBayAdmin(AdminView):
     column_list = ['maMayBay', 'tenMayBay', 'tongSoGhe']
     form_columns = ['tenMayBay', 'tongSoGhe', 'gheHang1', 'gheHang2']
     can_export = True
@@ -147,7 +165,8 @@ class MayBayAdmin(ModelView):
         if form.gheHang1.data + form.gheHang2.data != form.tongSoGhe.data:
             raise ValidationError("Tổng số ghế không khớp với ghế hạng 1 + ghế hạng 2")
 
-class ChuyenBayAdmin(ModelView):
+
+class ChuyenBayAdmin(AdminView):
     column_list = ['maChuyenBay', 'tuyenBay', 'gioDi', 'gioDen', 'mayBay']
     form_columns = ['tuyenBay', 'gioDi', 'gioDen', 'mayBay']
     can_export = True
@@ -220,9 +239,32 @@ class ChuyenBayAdmin(ModelView):
         return super(ChuyenBayAdmin, self).on_model_change(form, model, is_created)
 
 
-admin.add_view(SanBayAdmin(SanBay, db.session))
-admin.add_view(MayBayAdmin(MayBay, db.session))
-admin.add_view(NhanVienAdmin(NhanVien, db.session))
-admin.add_view(KhachHangAdmin(KhachHang, db.session))
-admin.add_view(ChuyenBayAdmin(ChuyenBay, db.session))
-admin.add_view(TuyenBayAdmin(TuyenBay, db.session))
+class AuthenticatedView(BaseView):
+    def is_accessible(self):
+        return current_user.is_authenticated
+
+
+class LogoutView(AuthenticatedView):
+    @expose('/')
+    def index(self):
+        logout_user()
+        return redirect('/admin')
+
+
+class StatsView(AuthenticatedView):
+    @expose('/')
+    def index(self):
+        nhanVien = NhanVien.query.count()
+        khackHang = KhachHang.query.count()
+
+        return self.render('admin/stats.html', nhanVien=nhanVien, khachHang=khackHang)
+
+
+admin.add_view(SanBayAdmin(SanBay, db.session, name='Sân bay'))
+admin.add_view(MayBayAdmin(MayBay, db.session, name='Máy bay'))
+admin.add_view(NhanVienAdmin(NhanVien, db.session, name='Nhân viên'))
+admin.add_view(KhachHangAdmin(KhachHang, db.session, name='Khách hàng'))
+admin.add_view(ChuyenBayAdmin(ChuyenBay, db.session, name='Chuyến bay'))
+admin.add_view(TuyenBayAdmin(TuyenBay, db.session, name='Tuyến bay'))
+admin.add_view(StatsView(name='Thống kê'))
+admin.add_view(LogoutView(name='Đăng xuất'))

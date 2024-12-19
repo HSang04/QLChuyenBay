@@ -10,7 +10,7 @@ import cloudinary
 
 app = Flask(__name__)
 app.secret_key = "k8HDLZbie2T8UWvC70S7f-SukGY"
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/qlcbdb?charset=utf8mb4" % quote('123456')
+app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://root:%s@localhost/qlcbdb?charset=utf8mb4" % quote('Admin@123') #123456
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = True
 
 

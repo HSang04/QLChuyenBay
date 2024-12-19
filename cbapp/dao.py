@@ -3,10 +3,10 @@ from cbapp import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 
-def auth_user(taiKhoan, matKhau):
+def auth_user(taiKhoan, matKhau, role=None):
     # Kiểm tra Nhân Viên
     user = NhanVien.query.filter_by(taiKhoan=taiKhoan).first()
-    if user and user.check_password(matKhau):
+    if user and user.check_password(matKhau) and user.vaiTro.__eq__(role):
         return user
 
     # Kiểm tra Khách Hàng

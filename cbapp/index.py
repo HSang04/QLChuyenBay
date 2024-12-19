@@ -25,9 +25,9 @@ def login_process():
 
 
             if isinstance(user, NhanVien):
-                if user.vaiTro == 'BANVE':
+                if user.vaiTro == VaiTro.BANVE:
                     return redirect('/banve')
-                elif user.vaiTro == 'QUANTRI':
+                elif user.vaiTro == VaiTro.QUANTRI:
                     return redirect('/admin')
             elif isinstance(user, KhachHang):
                 return redirect('/trangchu')
@@ -62,17 +62,16 @@ def load_user(user_id):
 #
 @app.route('/banve')
 def banve():
-    if isinstance(current_user, NhanVien) and current_user.vaiTro == 'BANVE':
+    if isinstance(current_user, NhanVien) and current_user.vaiTro.__eq__(VaiTro.BANVE):
         return render_template('banve.html')
     return redirect('/login')
 
 
-
-@app.route('/quantri')
-def quantri():
-    if isinstance(current_user, NhanVien) and current_user.vaiTro == 'QUANTRI':
-        return render_template('quantri.html')
-    return redirect('/login')
+# @app.route('/quantri')
+# def quantri():
+#     if isinstance(current_user, NhanVien) and current_user.vaiTro.__eq__(VaiTro.QUANTRI):
+#         return render_template('quantri.html')
+#     return redirect('/login')
 
 
 @app.route('/trangchu')
@@ -112,6 +111,7 @@ def tim_chuyen_bay():
         ).all()
 
     return render_template('timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays)
+
 @app.route('/dat_ve/<int:ma_chuyen_bay>', methods=['GET', 'POST'])
 def dat_ve(ma_chuyen_bay):
     if not current_user.is_authenticated:

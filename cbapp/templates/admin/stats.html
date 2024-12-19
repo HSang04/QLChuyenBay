@@ -1,0 +1,39 @@
+{% extends 'admin/master.html' %}
+
+{% block body %}
+<h1 class="text-center text-danger mt-1">THỐNG KÊ BÁO CÁO</h1>
+
+<div class="row">
+    <div class="col-md-7 col-12"></div>
+    <div class="col-md-5 col-12">
+        <canvas id="myChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    window.onload = function() {
+          const ctx = document.getElementById('myChart');
+
+          new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: ['NhanVien', 'KhachHang'],
+              datasets: [{
+                label: '# nguoi',
+                data: [{{ nhanVien }}, {{ khachHang }}],
+                borderWidth: 1,
+                backgroundColor: ['red', 'green', 'blue']
+              }]
+            },
+            options: {
+              scales: {
+                y: {
+                  beginAtZero: true
+                }
+              }
+            }
+          });
+    }
+</script>
+{% endblock %}
