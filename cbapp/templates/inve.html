@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>In Vé</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Vé Chuyến Bay: {{ chuyenBay.tenTuyenBay }}</h1>
+    <p><strong>Giờ đi:</strong> {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</p>
+    <p><strong>Giờ đến:</strong> {{ chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y") }}</p>
+
+    <h2>Thông tin vé đã bán</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Mã vé</th>
+                <th>Họ tên khách hàng</th>
+                <th>Số điện thoại</th>
+                <th>Email</th>
+                <th>Hạng vé</th>
+                <th>Giá vé</th>
+                <th>Số ghế</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for ve in ves %}
+            <tr>
+                <td>{{ ve.maVe }}</td>
+                <td>{{ ve.tenKhachHang }}</td>
+                <td>{{ ve.soDienThoai }}</td>
+                <td>{{ ve.email }}</td>
+                <td>{{ 'Thương Gia' if ve.maHangVe == 1 else 'Phổ Thông' }}</td>
+                <td>{{ ve.giaVe }} VND</td>  
+                <td>{{ ve.maGhe }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h3>Tổng tiền: {{ total_price }} VND</h3>
+
+    <h3>Số ghế đã chọn:</h3>
+    <ul>
+        {% for ghe in so_ghes %}
+            <li>{{ ghe }}</li>
+        {% endfor %}
+    </ul>
+
+
+    <button onclick="window.print()">In Vé</button>
+
+
+<button onclick="window.location.href='{{ url_for('banve') }}'">Hoàn thành</button>
+
+</body>
+</html>

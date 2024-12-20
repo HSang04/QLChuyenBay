@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from cbapp import app, dao, login, db, create_db
-from cbapp.models import KhachHang, NhanVien
+from cbapp.models import KhachHang, NhanVien, Ghe, Ve
 
 
 @app.route('/')
@@ -170,6 +170,148 @@ def thanh_toan():
 
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
+
+
+@app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
+@login_required
+def tim_chuyen_bay_ban_ve():
+    # Kiểm tra nếu người dùng là nhân viên bán vé
+    if isinstance(current_user, NhanVien) and current_user.vaiTro == VaiTro.BANVE:
+        sanBays = SanBay.query.all()  # Lấy danh sách tất cả sân bay
+        chuyenBays = []  # Khởi tạo danh sách chuyến bay
+
+        if request.method == 'POST':
+            sanBayDi = request.form['sanBayDi']
+            sanBayDen = request.form['sanBayDen']
+            ngayDi = request.form['ngayDi']
+
+            # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
+            chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
+                TuyenBay.maSanBayDi == sanBayDi,
+                TuyenBay.maSanBayDen == sanBayDen,
+                ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d')
+            ).all()
+
+        return render_template('banve_timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays)
+
+    return redirect('/login')
+
+@app.route('/banve/banve/<int:ma_chuyen_bay>', methods=['GET', 'POST'])
+def ban_ve(ma_chuyen_bay):
+    chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
+
+    # Tính giá vé cho các loại vé
+    gia_ve_thuong_gia = chuyenBay.tinh_gia_ve('ThuongGia', datetime.now().strftime("%d/%m/%Y %H:%M"))
+    gia_ve_pho_thong = chuyenBay.tinh_gia_ve('PhoThong', datetime.now().strftime("%d/%m/%Y %H:%M"))
+    total_price = None
+
+    # Kiểm tra số ghế còn lại trên chuyến bay
+    gheThuongGia = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe='ThuongGia').all()
+    ghePhoThong = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe='PhoThong').all()
+
+    soGheThuongGiaConLai = len([ghe for ghe in gheThuongGia if ghe.trangThai == False])
+    soGhePhoThongConLai = len([ghe for ghe in ghePhoThong if ghe.trangThai == False])
+
+    if request.method == 'POST':
+        so_luong_ve = int(request.form['so_luong_ve'])
+        loai_ve = request.form.get('loai_ve')
+        ten_nguoi_mua = request.form['ten_nguoi_mua']
+        so_dien_thoai = request.form['so_dien_thoai']
+        email = request.form['email']
+
+        # Kiểm tra xem có đủ ghế không
+        if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
+            flash('Thất bại: Không đủ ghế Thương Gia.', 'danger')
+            return redirect(url_for('ban_ve', ma_chuyen_bay=ma_chuyen_bay))
+
+        if loai_ve == 'PhoThong' and so_luong_ve > soGhePhoThongConLai:
+            flash('Thất bại: Không đủ ghế Phổ Thông.', 'danger')
+            return redirect(url_for('ban_ve', ma_chuyen_bay=ma_chuyen_bay))
+
+        # Xác định giá vé và mã hạng vé
+        if loai_ve == 'ThuongGia':
+            gia_ve = gia_ve_thuong_gia
+            maHangVe = 1  # Mã tương ứng với Thương Gia
+        elif loai_ve == 'PhoThong':
+            gia_ve = gia_ve_pho_thong
+            maHangVe = 2  # Mã tương ứng với Phổ Thông
+
+        # Tính tổng giá vé
+        total_price = gia_ve * so_luong_ve
+
+        # Tạo vé và lưu thông tin vào cơ sở dữ liệu
+        ve_ids = []
+        for _ in range(so_luong_ve):
+            ghe_con_lai = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe=loai_ve, trangThai=False).first()
+            if ghe_con_lai:
+                # Đánh dấu ghế đã bán
+                ghe_con_lai.trangThai = True
+                db.session.commit()
+
+                # Tạo vé mới và gán giá vé vào
+                ve = Ve(
+                    tinhTrangVe='Đã bán',
+                    maChuyenBay=chuyenBay.maChuyenBay,
+                    maKhachHang=None,  # Nếu là bán vé, không cần maKhachHang
+                    maGhe=ghe_con_lai.maGhe,
+                    maHangVe=maHangVe,  # Sử dụng maHangVe xác định đúng loại ghế
+                    tenKhachHang=ten_nguoi_mua,  # Thông tin khách hàng bán vé
+                    soDienThoai=so_dien_thoai,
+                    email=email,
+                    giaVe=gia_ve  # Lưu giá vé vào trường giaVe của vé
+                )
+                db.session.add(ve)
+                db.session.commit()
+
+                # Lưu ID của vé đã bán
+                ve_ids.append(ve.maVe)
+
+        flash("Bán vé thành công!", 'success')
+
+        # Chuyển hướng đến trang in vé, kèm theo các ID vé đã bán
+        return redirect(url_for('in_ve', ma_chuyen_bay=ma_chuyen_bay, ve_ids=ve_ids))
+
+    # Định dạng giờ đi và giờ đến
+    gio_di_formatted = chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y")
+    gio_den_formatted = chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y")
+
+    return render_template('banve_banve.html',
+                           chuyenBay=chuyenBay,
+                           gia_ve_thuong_gia=gia_ve_thuong_gia,
+                           gia_ve_pho_thong=gia_ve_pho_thong,
+                           total_price=total_price,
+                           gio_di_formatted=gio_di_formatted,
+                           gio_den_formatted=gio_den_formatted,
+                           soGheThuongGiaConLai=soGheThuongGiaConLai,
+                           soGhePhoThongConLai=soGhePhoThongConLai)
+@app.route('/inve/<int:ma_chuyen_bay>', methods=['GET'])
+def in_ve(ma_chuyen_bay):
+    # Lấy thông tin chuyến bay
+    chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
+
+    # Lấy các vé đã bán theo ID
+    ve_ids = request.args.getlist('ve_ids')
+    ves = Ve.query.filter(Ve.maVe.in_(ve_ids)).all()
+
+    # Tính tổng tiền và lấy các số ghế đã chọn
+    total_price = 0
+    so_ghes = []
+    gia_ve_list = []  # Danh sách giá vé
+
+    for ve in ves:
+        # Lấy giá vé trực tiếp từ trường giaVe của vé
+        if ve.giaVe:  # Kiểm tra xem giaVe có giá trị không
+            total_price += ve.giaVe  # Thêm giá vé vào tổng tiền
+            gia_ve_list.append(ve.giaVe)  # Lưu giá vé vào danh sách giá vé
+        so_ghes.append(ve.maGhe)  # Lưu số ghế đã chọn
+
+    # Truyền dữ liệu vào template
+    return render_template('inve.html',
+                           chuyenBay=chuyenBay,
+                           ves=ves,
+                           total_price=total_price,
+                           so_ghes=so_ghes,
+                           gia_ve_list=gia_ve_list)
 
 
 if __name__ == '__main__':

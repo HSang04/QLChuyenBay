@@ -11,7 +11,7 @@ from wtforms import Form, StringField, SelectField, form
 from wtforms.fields.choices import SelectMultipleField
 from wtforms.validators import DataRequired
 from cbapp import app, db
-from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro
+from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe
 from flask_wtf import FlaskForm
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
@@ -155,6 +155,8 @@ class SanBayAdmin(AdminView):
     page_size = 10
 
 
+
+
 class MayBayAdmin(AdminView):
     column_list = ['maMayBay', 'tenMayBay', 'tongSoGhe']
     form_columns = ['tenMayBay', 'tongSoGhe', 'gheHang1', 'gheHang2']
@@ -162,8 +164,41 @@ class MayBayAdmin(AdminView):
     page_size = 10
 
     def on_model_change(self, form, model, is_created):
-        if form.gheHang1.data + form.gheHang2.data != form.tongSoGhe.data:
-            raise ValidationError("Tổng số ghế không khớp với ghế hạng 1 + ghế hạng 2")
+        if is_created:
+            ghe_hang_1 = form.gheHang1.data
+            ghe_hang_2 = form.gheHang2.data
+            tong_so_ghe = form.tongSoGhe.data
+            if ghe_hang_1 + ghe_hang_2 != tong_so_ghe:
+                raise ValidationError(f"Tổng số ghế ({ghe_hang_1 + ghe_hang_2}) không khớp với tổng số ghế máy bay ({tong_so_ghe})")
+
+
+            may_bay = MayBay.query.filter_by(tenMayBay=model.tenMayBay).first()
+
+            for i in range(ghe_hang_1):
+                ghe = Ghe(tenGhe=f"{model.tenMayBay}-H1-{i+1}", hangGhe="ThuongGia", trangThai=False, maMayBay=may_bay.maMayBay)
+                db.session.add(ghe)
+
+
+            for i in range(ghe_hang_2):
+                ghe = Ghe(tenGhe=f"{model.tenMayBay}-H2-{i+ghe_hang_1+1}", hangGhe="PhoThong", trangThai=False, maMayBay=may_bay.maMayBay)
+                db.session.add(ghe)
+
+            db.session.commit()
+
+        return super(MayBayAdmin, self).on_model_change(form, model, is_created)
+
+    def on_model_delete(self, model):
+        # Lấy máy bay từ tên máy bay (tenMayBay) khi xóa
+        may_bay = MayBay.query.filter_by(tenMayBay=model.tenMayBay).first()
+
+        if may_bay:
+            # Xóa tất cả ghế liên quan đến máy bay này
+            Ghe.query.filter(Ghe.maMayBay == may_bay.maMayBay).delete()
+            db.session.commit()
+
+        return super(MayBayAdmin, self).on_model_delete(model)
+
+
 
 
 class ChuyenBayAdmin(AdminView):

@@ -8,8 +8,15 @@
 </head>
 <body>
     <div class="container">
-        <h2>Admin Bán Vé Dashboard</h2>
-        <p>Chào mừng bạn đến với trang quản lý bán vé.</p>
+        <h2>Bán Vé</h2>
+
+        <!-- Hiển thị lời chào với tên người bán vé -->
+        <p>Chào, {{ current_user.tenNhanVien }}! Chào mừng bạn đến với trang quản lý bán vé.</p>
+
+        <!-- Nút chức năng bán vé (đã sửa lại liên kết) -->
+        <a href="/banve/tim-chuyen-bay" class="btn btn-primary">Chức năng Bán Vé</a>
+
+        <!-- Nút đăng xuất -->
         <a href="/logout" class="btn btn-danger">Đăng xuất</a>
     </div>
 </body>

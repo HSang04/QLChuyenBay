@@ -1,0 +1,98 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Bán Vé Chuyến Bay{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Bán Vé Chuyến Bay</h2>
+
+    <div class="row">
+        <div class="col-md-6 offset-md-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">Chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
+                    <p><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
+                    <p><strong>Giờ đi:</strong> {{ gio_di_formatted }}</p>
+                    <p><strong>Giờ đến:</strong> {{ gio_den_formatted }}</p>
+
+                    <!-- Hiển thị số ghế còn lại -->
+                    <div class="alert alert-info">
+                        <strong>Ghế còn lại:</strong>
+                        <br>
+                        Phổ thông: {{ soGhePhoThongConLai }} ghế còn
+                        <br>
+                        Thương gia: {{ soGheThuongGiaConLai }} ghế còn
+                    </div>
+
+                    <form method="POST">
+                        <!-- Hiển thị giá vé 1 vé -->
+                        <div class="mb-3">
+                            <label class="form-label">Giá vé 1 vé</label>
+                            <div>
+                                <p><strong>Phổ thông:</strong> {{ gia_ve_pho_thong }} VND</p>
+                                <p><strong>Thương gia:</strong> {{ gia_ve_thuong_gia }} VND</p>
+                            </div>
+                        </div>
+
+                        <!-- Số lượng vé -->
+                        <div class="mb-3">
+                            <label for="so_luong_ve" class="form-label">Số lượng vé</label>
+                            <input type="number" class="form-control" id="so_luong_ve" name="so_luong_ve" required min="1">
+                        </div>
+
+                        <!-- Loại vé -->
+                        <div class="mb-3">
+                            <label for="loai_ve" class="form-label">Loại vé</label>
+                            <select class="form-select" id="loai_ve" name="loai_ve">
+                                <option value="PhoThong">Phổ thông</option>
+                                <option value="ThuongGia">Thương gia</option>
+                            </select>
+                        </div>
+
+                        <!-- Thông tin người mua -->
+                        <div class="mb-3">
+                            <label for="ten_nguoi_mua" class="form-label">Tên người mua</label>
+                            <input type="text" class="form-control" id="ten_nguoi_mua" name="ten_nguoi_mua" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="so_dien_thoai" class="form-label">Số điện thoại</label>
+                            <input type="text" class="form-control" id="so_dien_thoai" name="so_dien_thoai" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+
+                        <!-- Nút Bán Vé -->
+                        <button type="submit" class="btn btn-primary">Bán Vé</button>
+                    </form>
+
+                    <!-- Hiển thị tổng giá vé -->
+                    {% if total_price is not none %}
+                        <div class="mt-3">
+                            <h4>Tổng giá vé:
+                                <span class="text-success">
+                                    {{ total_price }} VND
+                                </span>
+                            </h4>
+                        </div>
+                    {% endif %}
+
+                    <!-- Thông báo lỗi nếu số ghế không đủ -->
+                    {% if flash_messages %}
+                        <div class="mt-3">
+                            <ul class="alert alert-danger">
+                                {% for message in flash_messages %}
+                                    <li>{{ message }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

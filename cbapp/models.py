@@ -1,9 +1,10 @@
 # models.py
 
+
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
-from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, DateTime, Enum
+from sqlalchemy import Column, Integer, String, Boolean, ForeignKey, JSON, Date, DateTime, Enum, Double
 from sqlalchemy.orm import relationship
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import date, datetime, timedelta
@@ -125,6 +126,17 @@ class ChuyenBay(db.Model):
 
     ves = relationship('Ve', backref='chuyenBay', cascade="all, delete-orphan")
 
+    def so_ve_da_ban(self):
+        return len(self.ves)
+
+    def so_ve_con_lai(self, loai_ve=None):
+        if loai_ve == "ThuongGia":
+            ghe_da_ban = sum([1 for ve in self.ves if ve.hangVe.tenHangVe == "ThuongGia"])
+            return self.mayBay.gheHang1 - ghe_da_ban
+        else:
+            ghe_da_ban = sum([1 for ve in self.ves if ve.hangVe.tenHangVe != "ThuongGia"])
+            return self.mayBay.gheHang2 - ghe_da_ban
+
     def tinh_gia_ve(self, loai_ve, ngay_dat):
         gia_ve = self.tuyenBay.giaCoBan
 
@@ -150,6 +162,7 @@ class ChuyenBay(db.Model):
 
 
 
+
 class HangVe(db.Model):
     __tablename__ = 'hangve'
     maHangVe = Column(Integer, primary_key=True, autoincrement=True)
@@ -158,24 +171,30 @@ class HangVe(db.Model):
     ves = relationship('Ve', backref='hangVe', cascade="all, delete-orphan")
 
 
-class GiaVe(db.Model):
-    __tablename__ = 'giave'
-    maGiaVe = Column(Integer, primary_key=True, autoincrement=True)
-    tenGiaVe = Column(String(50), nullable=False)
-
-    ves = relationship('Ve', backref='giaVe', cascade="all, delete-orphan")
+# class GiaVe(db.Model):
+#     __tablename__ = 'giave'
+#     maGiaVe = Column(Integer, primary_key=True, autoincrement=True)
+#     tenGiaVe = Column(String(50), nullable=False)
+#
+#     ves = relationship('Ve', backref='giaVe', cascade="all, delete-orphan")
 
 
 class Ve(db.Model):
     __tablename__ = 've'
     maVe = Column(Integer, primary_key=True, autoincrement=True)
     tinhTrangVe = Column(String(50), nullable=False)
+    giaVe = Column(Double, nullable=False)
     maChuyenBay = Column(Integer, ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
-    maKhachHang = Column(Integer, ForeignKey('khachhang.maKhachHang'), nullable=False)
+    maKhachHang = Column(Integer, ForeignKey('khachhang.maKhachHang'), nullable=True)  # Để nullable cho đặt vé
     maGhe = Column(Integer, ForeignKey('ghe.maGhe'), nullable=False)
     maHangVe = Column(Integer, ForeignKey('hangve.maHangVe'), nullable=False)
-    maGiaVe = Column(Integer, ForeignKey('giave.maGiaVe'), nullable=True)
     maNhanVien = Column(Integer, ForeignKey('nhanvien.maNhanVien'), nullable=True)
+
+    # Thêm các trường để lưu thông tin khách hàng khi bán vé
+    tenKhachHang = Column(String(100), nullable=True)  # Có thể bỏ trống
+    soDienThoai = Column(String(15), nullable=True)  # Có thể bỏ trống
+    email = Column(String(100), nullable=True)  # Có thể bỏ trống
+
 
 
 if __name__ == '__main__':
@@ -224,8 +243,12 @@ if __name__ == '__main__':
         tb = TuyenBay(tenTuyenBay="Hà Nội - TP. HCM", maSanBayDi="HAN", maSanBayDen="SGN", giaCoBan="1000000")
         db.session.add(tb)
 
-        mb = MayBay(tenMayBay="VN01", tongSoGhe=300, gheHang1=50, gheHang2=200)
-        db.session.add(mb)
+        hangve_thuong_gia = HangVe(tenHangVe='Thương Gia')
+        hangve_pho_thong = HangVe(tenHangVe='Phổ Thông')
+
+        # Thêm vào session và commit
+        db.session.add_all([hangve_thuong_gia, hangve_pho_thong])
+        db.session.commit()
 
 
         db.session.commit()
