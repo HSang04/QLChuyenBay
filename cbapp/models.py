@@ -108,8 +108,10 @@ class Ghe(db.Model):
     trangThai = db.Column(db.Boolean, nullable=False)  # Status of the seat (available or booked)
     hangGhe = db.Column(db.String(50), nullable=False)  # Class of seat (economy, business, etc.)
     maMayBay = db.Column(db.Integer, db.ForeignKey('maybay.maMayBay'), nullable=False)
+    maChuyenbay = db.Column(db.Integer, db.ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
 
     mayBay = db.relationship('MayBay', backref=db.backref('ghe', lazy=True))
+    chuyenBay = db.relationship('ChuyenBay', backref=db.backref('ghe', lazy=True))
 
 
 class ChuyenBay(db.Model):
@@ -169,14 +171,6 @@ class HangVe(db.Model):
     tenHangVe = Column(String(50), nullable=False)
 
     ves = relationship('Ve', backref='hangVe', cascade="all, delete-orphan")
-
-
-# class GiaVe(db.Model):
-#     __tablename__ = 'giave'
-#     maGiaVe = Column(Integer, primary_key=True, autoincrement=True)
-#     tenGiaVe = Column(String(50), nullable=False)
-#
-#     ves = relationship('Ve', backref='giaVe', cascade="all, delete-orphan")
 
 
 class Ve(db.Model):

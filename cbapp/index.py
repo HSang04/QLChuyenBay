@@ -205,8 +205,8 @@ def ban_ve(ma_chuyen_bay):
     total_price = None
 
     # Kiểm tra số ghế còn lại trên chuyến bay
-    gheThuongGia = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe='ThuongGia').all()
-    ghePhoThong = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe='PhoThong').all()
+    gheThuongGia = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='ThuongGia').all()
+    ghePhoThong = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='PhoThong').all()
 
     soGheThuongGiaConLai = len([ghe for ghe in gheThuongGia if ghe.trangThai == False])
     soGhePhoThongConLai = len([ghe for ghe in ghePhoThong if ghe.trangThai == False])
@@ -218,7 +218,7 @@ def ban_ve(ma_chuyen_bay):
         so_dien_thoai = request.form['so_dien_thoai']
         email = request.form['email']
 
-        # Kiểm tra xem có đủ ghế không
+        # Kiểm tra số lượng ghế trống còn lại
         if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
             flash('Thất bại: Không đủ ghế Thương Gia.', 'danger')
             return redirect(url_for('ban_ve', ma_chuyen_bay=ma_chuyen_bay))
@@ -244,34 +244,38 @@ def ban_ve(ma_chuyen_bay):
         # Tạo vé và lưu thông tin vào cơ sở dữ liệu
         ve_ids = []
         for _ in range(so_luong_ve):
-            ghe_con_lai = Ghe.query.filter_by(maMayBay=chuyenBay.maMayBay, hangGhe=loai_ve, trangThai=False).first()
-            if ghe_con_lai:
-                # Đánh dấu ghế đã bán
-                ghe_con_lai.trangThai = True
-                db.session.commit()
+            ghe_con_lai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe=loai_ve, trangThai=False).first()
 
-                # Tạo vé mới và gán giá vé vào
-                ve = Ve(
-                    tinhTrangVe='Đã bán',
-                    maChuyenBay=chuyenBay.maChuyenBay,
-                    maKhachHang=None,  # Nếu là bán vé, không cần maKhachHang
-                    maGhe=ghe_con_lai.maGhe,
-                    maHangVe=maHangVe,  # Sử dụng maHangVe xác định đúng loại ghế
-                    tenKhachHang=ten_nguoi_mua,  # Thông tin khách hàng bán vé
-                    soDienThoai=so_dien_thoai,
-                    email=email,
-                    giaVe=gia_ve,  # Lưu giá vé vào trường giaVe của vé
-                    maNhanVien=ma_nhan_vien  # Lưu mã nhân viên vào vé
-                )
-                db.session.add(ve)
-                db.session.commit()
+            # Nếu không có ghế trống, tạo ghế mới cho chuyến bay cụ thể
+            if not ghe_con_lai:
+                ghe_con_lai = Ghe(maMayBay=chuyenBay.maMayBay, hangGhe=loai_ve, trangThai=False, maChuyenbay=chuyenBay.maChuyenBay)
+                db.session.add(ghe_con_lai)
+                db.session.commit()  # Đảm bảo ghế được lưu vào CSDL trước khi bán vé
 
-                # Lưu ID của vé đã bán
-                ve_ids.append(ve.maVe)
+            # Đánh dấu ghế đã bán
+            ghe_con_lai.trangThai = True
+            db.session.commit()  # Lưu lại thay đổi ghế
+
+            # Tạo vé mới và gán giá vé vào
+            ve = Ve(
+                tinhTrangVe='Đã bán',
+                maChuyenBay=chuyenBay.maChuyenBay,
+                maKhachHang=None,  # Nếu là bán vé, không cần maKhachHang
+                maGhe=ghe_con_lai.maGhe,
+                maHangVe=maHangVe,  # Sử dụng maHangVe xác định đúng loại ghế
+                tenKhachHang=ten_nguoi_mua,  # Thông tin khách hàng bán vé
+                soDienThoai=so_dien_thoai,
+                email=email,
+                giaVe=gia_ve,  # Lưu giá vé vào trường giaVe của vé
+                maNhanVien=ma_nhan_vien  # Lưu mã nhân viên vào vé
+            )
+            db.session.add(ve)
+            db.session.commit()
+
+            # Lưu ID của vé đã bán
+            ve_ids.append(ve.maVe)
 
         flash("Bán vé thành công!", 'success')
-
-        # Chuyển hướng đến trang in vé, kèm theo các ID vé đã bán
         return redirect(url_for('in_ve', ma_chuyen_bay=ma_chuyen_bay, ve_ids=ve_ids))
 
     # Định dạng giờ đi và giờ đến
@@ -287,9 +291,6 @@ def ban_ve(ma_chuyen_bay):
                            gio_den_formatted=gio_den_formatted,
                            soGheThuongGiaConLai=soGheThuongGiaConLai,
                            soGhePhoThongConLai=soGhePhoThongConLai)
-
-
-
 @app.route('/inve/<int:ma_chuyen_bay>', methods=['GET'])
 def in_ve(ma_chuyen_bay):
     # Lấy thông tin chuyến bay
@@ -318,7 +319,6 @@ def in_ve(ma_chuyen_bay):
                            total_price=total_price,
                            so_ghes=so_ghes,
                            gia_ve_list=gia_ve_list)
-
 
 
 if __name__ == '__main__':

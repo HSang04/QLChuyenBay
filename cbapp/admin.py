@@ -164,41 +164,8 @@ class MayBayAdmin(AdminView):
     page_size = 10
 
     def on_model_change(self, form, model, is_created):
-        if is_created:
-            ghe_hang_1 = form.gheHang1.data
-            ghe_hang_2 = form.gheHang2.data
-            tong_so_ghe = form.tongSoGhe.data
-            if ghe_hang_1 + ghe_hang_2 != tong_so_ghe:
-                raise ValidationError(f"Tổng số ghế ({ghe_hang_1 + ghe_hang_2}) không khớp với tổng số ghế máy bay ({tong_so_ghe})")
-
-
-            may_bay = MayBay.query.filter_by(tenMayBay=model.tenMayBay).first()
-
-            for i in range(ghe_hang_1):
-                ghe = Ghe(tenGhe=f"{model.tenMayBay}-H1-{i+1}", hangGhe="ThuongGia", trangThai=False, maMayBay=may_bay.maMayBay)
-                db.session.add(ghe)
-
-
-            for i in range(ghe_hang_2):
-                ghe = Ghe(tenGhe=f"{model.tenMayBay}-H2-{i+ghe_hang_1+1}", hangGhe="PhoThong", trangThai=False, maMayBay=may_bay.maMayBay)
-                db.session.add(ghe)
-
-            db.session.commit()
-
-        return super(MayBayAdmin, self).on_model_change(form, model, is_created)
-
-    def on_model_delete(self, model):
-        # Lấy máy bay từ tên máy bay (tenMayBay) khi xóa
-        may_bay = MayBay.query.filter_by(tenMayBay=model.tenMayBay).first()
-
-        if may_bay:
-            # Xóa tất cả ghế liên quan đến máy bay này
-            Ghe.query.filter(Ghe.maMayBay == may_bay.maMayBay).delete()
-            db.session.commit()
-
-        return super(MayBayAdmin, self).on_model_delete(model)
-
-
+        if form.gheHang1.data + form.gheHang2.data != form.tongSoGhe.data:
+            raise ValidationError("Tổng số ghế không khớp với ghế hạng 1 + ghế hạng 2")
 
 
 class ChuyenBayAdmin(AdminView):
@@ -233,46 +200,62 @@ class ChuyenBayAdmin(AdminView):
 
     def on_model_change(self, form, model, is_created):
         if is_created:
-
             may_bay = form.mayBay.data
             gio_di = form.gioDi.data
             gio_den = form.gioDen.data
 
+            # Kiểm tra thông tin chuyến bay
             if not may_bay:
                 raise ValidationError("Vui lòng chọn máy bay.")
             if not gio_di or not gio_den:
                 raise ValidationError("Vui lòng chọn giờ đi và giờ đến.")
 
-
             if gio_di >= gio_den:
                 raise ValidationError("Giờ đi phải trước giờ đến.")
 
-
-
-
+            # Kiểm tra máy bay có bị trùng lịch không
             existing_flights = ChuyenBay.query.filter(ChuyenBay.maMayBay == may_bay.maMayBay).all()
-
-
             if model.maChuyenBay:
                 existing_flights = [flight for flight in existing_flights if flight.maChuyenBay != model.maChuyenBay]
-
-
-
-
 
             for flight in existing_flights:
                 if not (gio_den <= flight.gioDi or gio_di >= flight.gioDen):
                     raise ValidationError(
                         f"Máy bay '{may_bay.tenMayBay}' đã được sử dụng trong chuyến bay từ {flight.gioDi} đến {flight.gioDen}. Vui lòng chọn thời gian khác.")
 
-
+            # Nếu tất cả các kiểm tra thành công, tiến hành tạo chuyến bay
             model.gioDi = gio_di
             model.gioDen = gio_den
             model.mayBay = may_bay
 
+            # Tạo ghế cho chuyến bay này
+            tong_so_ghe = may_bay.tongSoGhe  # Tổng số ghế của máy bay
+            ghe_thuong_gia = may_bay.gheHang1  # Số ghế hạng Thương Gia
+            ghe_pho_thong = may_bay.gheHang2  # Số ghế hạng Phổ Thông
+
+            # Tạo ghế hạng Thương Gia
+            for i in range(ghe_thuong_gia):
+                ghe = Ghe(tenGhe=f"{may_bay.tenMayBay}-{i+1}", maChuyenbay=model.maChuyenBay, hangGhe='ThuongGia', trangThai=False, maMayBay=may_bay.maMayBay)  # Ghế trống
+                db.session.add(ghe)
+
+            # Tạo ghế hạng Phổ Thông
+            for i in range(ghe_pho_thong):
+                ghe = Ghe(tenGhe=f"{may_bay.tenMayBay}-{i+ghe_thuong_gia+1}", maChuyenbay=model.maChuyenBay, hangGhe='PhoThong', trangThai=False, maMayBay=may_bay.maMayBay)  # Ghế trống
+                db.session.add(ghe)
+
+            db.session.commit()
 
         return super(ChuyenBayAdmin, self).on_model_change(form, model, is_created)
 
+    def on_model_delete(self, model):
+        # Xóa tất cả ghế liên quan đến chuyến bay
+        ghe_list = Ghe.query.filter_by(maChuyenbay=model.maChuyenBay).all()
+        for ghe in ghe_list:
+            db.session.delete(ghe)
+
+        db.session.commit()
+
+        return super(ChuyenBayAdmin, self).on_model_delete(model)
 
 class AuthenticatedView(BaseView):
     def is_accessible(self):
