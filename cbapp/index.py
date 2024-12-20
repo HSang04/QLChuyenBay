@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from cbapp import app, dao, login, db, create_db
-from cbapp.models import KhachHang, NhanVien, Ghe, Ve
+from cbapp.models import KhachHang, NhanVien, Ve
 
 
 @app.route('/')
@@ -76,45 +76,25 @@ def banve():
 
 @app.route('/trangchu')
 def trangchu():
-    # Kiểm tra xem người dùng đã đăng nhập chưa
-    if not current_user.is_authenticated:
-        return redirect('/login')  # Nếu chưa đăng nhập, chuyển hướng đến trang đăng nhập
 
-    # Nếu người dùng là nhân viên bán vé, chuyển hướng đến trang bán vé
-    if isinstance(current_user, NhanVien) and current_user.vaiTro == VaiTro.BANVE:
-        return redirect('/banve')
+    sanBays = SanBay.query.all()
 
-    # Nếu người dùng là nhân viên quản trị, chuyển hướng đến trang quản trị
-    elif isinstance(current_user, NhanVien) and current_user.vaiTro == VaiTro.QUANTRI:
-        return redirect('/admin')
+    # Handle form submission
+    sanBayDi = request.args.get('sanBayDi')
+    sanBayDen = request.args.get('sanBayDen')
+    ngayDi = request.args.get('ngayDi')
 
-    # Nếu người dùng là khách hàng, tiếp tục ở trang chủ
-    elif isinstance(current_user, KhachHang):
-        sanBays = SanBay.query.all()
+    # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
+    chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
+        (TuyenBay.maSanBayDi == sanBayDi if sanBayDi else True) &
+        (TuyenBay.maSanBayDen == sanBayDen if sanBayDen else True) &
+        (ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d') if ngayDi else True)
+    ).all()
 
-        # Handle form submission
-        sanBayDi = request.args.get('sanBayDi')
-        sanBayDen = request.args.get('sanBayDen')
-        ngayDi = request.args.get('ngayDi')
-
-        # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
-        chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
-            (TuyenBay.maSanBayDi == sanBayDi if sanBayDi else True) &
-            (TuyenBay.maSanBayDen == sanBayDen if sanBayDen else True) &
-            (ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d') if ngayDi else True)
-        ).all()
-
-        return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays)
-
-    # Nếu không phải nhân viên bán vé hay khách hàng, điều hướng đến trang login
-    return redirect('/login')
+    return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays)
 
 @app.route('/tim-chuyen-bay', methods=['GET', 'POST'])
 def tim_chuyen_bay():
-    if current_user.is_authenticated and isinstance(current_user, NhanVien) and current_user.vaiTro == VaiTro.BANVE:
-        # Nếu là nhân viên bán vé, chuyển hướng đến trang tìm chuyến bay của nhân viên bán vé
-        return redirect('/banve/tim-chuyen-bay')
-
     sanBays = SanBay.query.all()  # Lấy danh sách tất cả sân bay
     chuyenBays = []  # Khởi tạo danh sách chuyến bay
 
@@ -123,7 +103,7 @@ def tim_chuyen_bay():
         sanBayDen = request.form['sanBayDen']
         ngayDi = request.form['ngayDi']
 
-        # Lọc chuyến bay theo thông tin từ form
+        # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
         chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
             TuyenBay.maSanBayDi == sanBayDi,
             TuyenBay.maSanBayDen == sanBayDen,
@@ -131,6 +111,7 @@ def tim_chuyen_bay():
         ).all()
 
     return render_template('timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays)
+
 @app.route('/dat_ve/<int:ma_chuyen_bay>', methods=['GET', 'POST'])
 def dat_ve(ma_chuyen_bay):
     if not current_user.is_authenticated:
@@ -189,7 +170,6 @@ def thanh_toan():
 
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
-
 
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
@@ -333,6 +313,8 @@ def in_ve(ma_chuyen_bay):
                            gia_ve_list=gia_ve_list)
 
 
+
 if __name__ == '__main__':
     from cbapp.admin import *
     app.run(debug=True)
+
