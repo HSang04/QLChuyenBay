@@ -5,8 +5,8 @@
 {% if current_user.is_authenticated %}
 <div class="container">
     <h2>Admin Quản Trị Dashboard</h2>
-    <h2>Chao {{ current_user.get_username() }}</h2>
-    <p>Chào mừng bạn đến với trang quản lý hệ thống.</p>
+    <h2>Chào {{ current_user.get_username() }}</h2>
+    <p>Chào mừng bạn đến với trang quản trị hệ thống.</p>
 </div>
 {% else %}
 <h1 class="text-center text-danger mt-1">DANG NHAP QUAN TRI</h1>

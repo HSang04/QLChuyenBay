@@ -12,7 +12,6 @@ from wtforms.fields.choices import SelectMultipleField
 from wtforms.validators import DataRequired
 from cbapp import app, db
 from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe
-from flask_wtf import FlaskForm
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
 from wtforms import SelectField
@@ -27,6 +26,8 @@ class AdminView(ModelView):
 
 class NhanVienAdmin(AdminView):
     column_list = ['tenNhanVien', 'email', 'soDienThoai','vaiTro']
+    column_labels = dict(tenNhanVien='Tên Nhân Viên', soDienThoai='Số Điện Thoại', vaiTro='Vai Trò')
+    column_searchable_list = ['tenNhanVien']
     form_choices = {
         'vaiTro': [(v.name, v.value) for v in VaiTro]}
 
@@ -41,6 +42,8 @@ class NhanVienAdmin(AdminView):
 
 class KhachHangAdmin(AdminView):
     column_list = ['hoVaTen', 'email', 'soDienThoai','active']
+    column_labels = dict(hoVaTen='Họ và Tên', soDienThoai='Số Điện Thoại')
+    column_searchable_list = ['hoVaTen']
     def on_model_change(self, form, model, is_created):
         if is_created:
             model.active = True
@@ -53,6 +56,7 @@ class KhachHangAdmin(AdminView):
 class TuyenBayAdmin(AdminView):
     form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen','giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
     column_list = ['maTuyenBay', 'tenTuyenBay', 'maSanBayDi', 'maSanBayDen']
+    column_labels = dict(maTuyenBay='Mã Tuyến Bay', tenTuyenBay='Tên Tuyến Bay', maSanBayDi='Mã Sân Bay Đi', sanBayDen='Mã Sân Bay Đến')
     can_export = True
     column_searchable_list = ['tenTuyenBay']
     column_filters = ['maTuyenBay', 'tenTuyenBay']
@@ -148,6 +152,7 @@ class TuyenBayAdmin(AdminView):
 
 class SanBayAdmin(AdminView):
     column_list = ['maSanBay', 'tenSanBay']
+    column_labels = dict(maSanBay='Mã Sân Bay', tenSanBay='Tên Sân Bay')
     form_columns = ['maSanBay','tenSanBay']
     can_export = True
     column_searchable_list = ['tenSanBay']
@@ -159,6 +164,8 @@ class SanBayAdmin(AdminView):
 
 class MayBayAdmin(AdminView):
     column_list = ['maMayBay', 'tenMayBay', 'tongSoGhe']
+    column_labels = dict(maMayBay='Mã Máy Bay', tenMayBay='Tên Máy Bay', tongSoGhe='Tổng Số Ghế')
+    column_searchable_list = ['tenMayBay']
     form_columns = ['tenMayBay', 'tongSoGhe', 'gheHang1', 'gheHang2']
     can_export = True
     page_size = 10
@@ -170,6 +177,8 @@ class MayBayAdmin(AdminView):
 
 class ChuyenBayAdmin(AdminView):
     column_list = ['maChuyenBay', 'tuyenBay', 'gioDi', 'gioDen', 'mayBay']
+    column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến', mayBay='Máy Bay')
+    column_searchable_list = ['maChuyenBay']
     form_columns = ['tuyenBay', 'gioDi', 'gioDen', 'mayBay']
     can_export = True
 
