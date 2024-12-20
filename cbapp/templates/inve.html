@@ -37,7 +37,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for ve in ves %}
+            {% for ve, ghe_name in ves_and_names %}
             <tr>
                 <td>{{ ve.maVe }}</td>
                 <td>{{ ve.tenKhachHang }}</td>
@@ -45,7 +45,7 @@
                 <td>{{ ve.email }}</td>
                 <td>{{ 'Thương Gia' if ve.maHangVe == 1 else 'Phổ Thông' }}</td>
                 <td>{{ ve.giaVe }} VND</td>
-                <td>{{ ve.maGhe }}</td>
+                <td>{{ ghe_name }}</td>
             </tr>
             {% endfor %}
         </tbody>
@@ -60,11 +60,8 @@
         {% endfor %}
     </ul>
 
-
     <button onclick="window.print()">In Vé</button>
-
-
-<button onclick="window.location.href='{{ url_for('banve') }}'">Hoàn thành</button>
+    <button onclick="window.location.href='{{ url_for('banve') }}'">Hoàn thành</button>
 
 </body>
 </html>

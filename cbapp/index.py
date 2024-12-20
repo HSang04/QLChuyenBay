@@ -291,6 +291,7 @@ def ban_ve(ma_chuyen_bay):
                            gio_den_formatted=gio_den_formatted,
                            soGheThuongGiaConLai=soGheThuongGiaConLai,
                            soGhePhoThongConLai=soGhePhoThongConLai)
+
 @app.route('/inve/<int:ma_chuyen_bay>', methods=['GET'])
 def in_ve(ma_chuyen_bay):
     # Lấy thông tin chuyến bay
@@ -304,6 +305,7 @@ def in_ve(ma_chuyen_bay):
     total_price = 0
     so_ghes = []
     gia_ve_list = []  # Danh sách giá vé
+    ghe_names = []  # Danh sách tên ghế
 
     for ve in ves:
         # Lấy giá vé trực tiếp từ trường giaVe của vé
@@ -312,14 +314,21 @@ def in_ve(ma_chuyen_bay):
             gia_ve_list.append(ve.giaVe)  # Lưu giá vé vào danh sách giá vé
         so_ghes.append(ve.maGhe)  # Lưu số ghế đã chọn
 
+        # Lấy tên ghế từ bảng Ghe thông qua maGhe
+        ghe = Ghe.query.get(ve.maGhe)
+        if ghe:
+            ghe_names.append(ghe.tenGhe)  # Thêm tên ghế vào danh sách
+
+    # Zip các vé với tên ghế trước khi truyền vào template
+    ves_and_names = list(zip(ves, ghe_names))
+
     # Truyền dữ liệu vào template
     return render_template('inve.html',
                            chuyenBay=chuyenBay,
-                           ves=ves,
+                           ves_and_names=ves_and_names,  # Truyền kết quả zip
                            total_price=total_price,
                            so_ghes=so_ghes,
                            gia_ve_list=gia_ve_list)
-
 
 if __name__ == '__main__':
     from cbapp.admin import *
