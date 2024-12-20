@@ -238,6 +238,9 @@ def ban_ve(ma_chuyen_bay):
         # Tính tổng giá vé
         total_price = gia_ve * so_luong_ve
 
+        # Lấy mã nhân viên bán vé từ current_user
+        ma_nhan_vien = current_user.maNhanVien
+
         # Tạo vé và lưu thông tin vào cơ sở dữ liệu
         ve_ids = []
         for _ in range(so_luong_ve):
@@ -257,7 +260,8 @@ def ban_ve(ma_chuyen_bay):
                     tenKhachHang=ten_nguoi_mua,  # Thông tin khách hàng bán vé
                     soDienThoai=so_dien_thoai,
                     email=email,
-                    giaVe=gia_ve  # Lưu giá vé vào trường giaVe của vé
+                    giaVe=gia_ve,  # Lưu giá vé vào trường giaVe của vé
+                    maNhanVien=ma_nhan_vien  # Lưu mã nhân viên vào vé
                 )
                 db.session.add(ve)
                 db.session.commit()
@@ -283,6 +287,9 @@ def ban_ve(ma_chuyen_bay):
                            gio_den_formatted=gio_den_formatted,
                            soGheThuongGiaConLai=soGheThuongGiaConLai,
                            soGhePhoThongConLai=soGhePhoThongConLai)
+
+
+
 @app.route('/inve/<int:ma_chuyen_bay>', methods=['GET'])
 def in_ve(ma_chuyen_bay):
     # Lấy thông tin chuyến bay
