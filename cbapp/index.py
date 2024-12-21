@@ -436,6 +436,18 @@ def xem_chuyen_bay(maChuyenBay):
     return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
 
 
+@app.route('/hoso')
+@login_required
+def account():
+    user_info = {
+        'username': current_user.taiKhoan,
+        'email': current_user.email,
+        'hoVaTen': current_user.hoVaTen,
+        'soDienThoai': current_user.soDienThoai
+    }
+    return render_template('hoso.html', user_info=user_info)
+
+
 if __name__ == '__main__':
     from cbapp.admin import *
     app.run(debug=True)

@@ -1,0 +1,29 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Hồ Sơ{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Thông Tin Hồ Sơ</h1>
+    <table class="table table-bordered mt-4">
+        <tbody>
+            <tr>
+                <th>Tên Đăng Nhập</th>
+                <td>{{ user_info.username }}</td>
+            </tr>
+            <tr>
+                <th>Email</th>
+                <td>{{ user_info.email }}</td>
+            </tr>
+            <tr>
+                <th>Họ và Tên</th>
+                <td>{{ user_info.hoVaTen }}</td>
+            </tr>
+            <tr>
+                <th>Số Điện Thoại</th>
+                <td>{{ user_info.soDienThoai }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

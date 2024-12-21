@@ -11,11 +11,11 @@
                 {% if current_user.is_authenticated %}
                     <!-- Hiển thị tên người dùng sau khi đăng nhập -->
                     <li class="nav-item">
-                        <a class="nav-link nav-action" href="#" data-title="Hồ Sơ">Chào, {{ current_user.get_username() }}</a>
+                        <a class="nav-link nav-action" href="/hoso" data-title="Hồ Sơ">Chào, {{ current_user.get_username() }}</a>
                     </li>
                      {% if current_user.is_khach_hang %}
                         <li class="nav-item">
-                            <a class="nav-link" href="thay-doi-thong-tin">Thay đổi thông tin</a>
+                            <a class="nav-link nav-action" href="thay-doi-thong-tin" data-title="Thay đổi thông tin">Thay đổi thông tin</a>
                         </li>
                     {% endif %}
                 {% endif %}
