@@ -388,6 +388,21 @@ def change_info():
 
     return render_template('thaydoithongtin.html', form=form)
 
+
+@app.route('/tra-cuu-chuyen-bay')
+@login_required
+def tracuu_chuyen_bay():
+    # Lấy tất cả chuyến bay từ cơ sở dữ liệu
+    chuyen_bays = ChuyenBay.query.all()
+    return render_template('tracuuchuyenbay.html', chuyen_bays=chuyen_bays)
+
+@app.route('/xem-chuyen-bay/<int:maChuyenBay>')
+@login_required
+def xem_chuyen_bay(maChuyenBay):
+    # Lấy thông tin chi tiết chuyến bay
+    chuyen_bay = ChuyenBay.query.get_or_404(maChuyenBay)
+    return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay)
+
 if __name__ == '__main__':
     from cbapp.admin import *
     app.run(debug=True)

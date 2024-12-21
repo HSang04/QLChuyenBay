@@ -1,0 +1,44 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Xem Chuyến Bay{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Thông Tin Chuyến Bay</h2>
+
+        <!-- Thông tin chuyến bay -->
+        <div class="mb-4">
+            <h4>{{ chuyen_bay.tuyenBay.tenTuyenBay }}</h4>
+            <p><strong>Giờ Đi:</strong> {{ chuyen_bay.gioDi.strftime('%d/%m/%Y %H:%M') }}</p>
+            <p><strong>Giờ Đến:</strong> {{ chuyen_bay.gioDen.strftime('%d/%m/%Y %H:%M') }}</p>
+            <p><strong>Máy Bay:</strong> {{ chuyen_bay.mayBay.tenMayBay }}</p>
+        </div>
+
+        <!-- Danh sách ghế -->
+        <h4>Danh Sách Ghế</h4>
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Ghế</th>
+                    <th>Hạng Ghế</th>
+                    <th>Trạng Thái</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ghe in chuyen_bay.ghe %}
+                    <tr>
+                        <td>{{ ghe.tenGhe }}</td>
+                        <td>{{ ghe.hangGhe }}</td>
+                        <td>
+                            {% if ghe.trangThai %}
+                                <span class="badge bg-success">Đã Đặt</span>
+                            {% else %}
+                                <span class="badge bg-warning">Còn Trống</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

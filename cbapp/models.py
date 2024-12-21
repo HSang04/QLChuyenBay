@@ -40,6 +40,10 @@ class KhachHang(db.Model, UserMixin):
     def get_username(self):
         return self.hoVaTen
 
+    @property
+    def is_khach_hang(self):
+        return True
+
 
 class NhanVien(db.Model, UserMixin):
     __tablename__ = 'nhanvien'
@@ -62,6 +66,10 @@ class NhanVien(db.Model, UserMixin):
 
     def get_username(self):
         return self.tenNhanVien
+
+    @property
+    def is_khach_hang(self):
+        return False
 
 
 class SanBay(db.Model):

@@ -1,0 +1,39 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Tra Cứu Chuyến Bay{% endblock %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Danh Sách Chuyến Bay</h2>
+
+        <!-- Nếu có chuyến bay -->
+        {% if chuyen_bays %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>Mã Chuyến Bay</th>
+                        <th>Tuyến Bay</th>
+                        <th>Giờ Đi</th>
+                        <th>Giờ Đến</th>
+                        <th>Thao Tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for chuyen_bay in chuyen_bays %}
+                        <tr>
+                            <td>{{ chuyen_bay.maChuyenBay }}</td>
+                            <td>{{ chuyen_bay.tuyenBay.tenTuyenBay }}</td>
+                            <td>{{ chuyen_bay.gioDi.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>{{ chuyen_bay.gioDen.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td>
+                                <a href="{{ url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay) }}" class="btn btn-info">Xem Chuyến Bay</a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>Không có chuyến bay nào để hiển thị.</p>
+        {% endif %}
+    </div>
+{% endblock %}
