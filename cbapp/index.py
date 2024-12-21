@@ -1,12 +1,18 @@
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
+from flask_wtf import FlaskForm
+
 from cbapp import app, dao, login, db, create_db
 from cbapp.models import KhachHang, NhanVien, Ve
+
+from wtforms.fields.simple import StringField, EmailField, PasswordField
+from wtforms.validators import InputRequired, Email, Length, EqualTo
 
 
 @app.route('/')
 def index():
     return redirect('/trangchu')
+
 
 
 
@@ -22,6 +28,16 @@ def login_process():
 
         if user:
             login_user(user)  # Flask-Login sẽ lưu ID người dùng vào session
+
+            app.logger.info(f"Login successful! Current user: {current_user}")
+            app.logger.info(f"User ID: {current_user.get_id()}")
+            app.logger.info(f"Username: {current_user.get_username()}")
+            app.logger.info(f"User Email: {current_user.email}")
+
+            if isinstance(user, KhachHang):
+                session['user_type'] = 1
+            elif isinstance(user, NhanVien):
+                session['user_type'] = 2
 
 
             if isinstance(user, NhanVien):
@@ -39,25 +55,27 @@ def login_process():
 @app.route('/logout')
 def logout():
     logout_user()  # Xóa ID người dùng khỏi session
+    session.pop('user_type', None)
     flash('Bạn đã đăng xuất thành công!', 'success')
     return redirect('/login')
 
 
-
 @login.user_loader
 def load_user(user_id):
+    user_type = session.get('user_type')
 
-    user = dao.get_nhan_vien_by_id(user_id)
-    if user:
-        return user
+    if user_type == 2:  # Nhân viên
+        user = dao.get_nhan_vien_by_id(user_id)
+        if user:
+            app.logger.info(f"Loaded NhanVien: {user}")
+            return user
 
-
-    user = KhachHang.query.get(user_id)
-    if user:
-        return user
-
+    elif user_type == 1:  # Khách hàng
+        user = dao.get_khach_hang_by_id(user_id)
+        if user:
+            app.logger.info(f"Loaded KhachHang: {user}")
+            return user
     return None
-
 
 #
 @app.route('/banve')
@@ -329,6 +347,46 @@ def in_ve(ma_chuyen_bay):
                            total_price=total_price,
                            so_ghes=so_ghes,
                            gia_ve_list=gia_ve_list)
+
+
+class ChangeInfoForm(FlaskForm):
+    ho_va_ten = StringField('Họ và Tên', validators=[InputRequired()])
+    email = EmailField('Email', validators=[InputRequired(), Email()])
+    so_dien_thoai = StringField('Số Điện Thoại', validators=[InputRequired()])
+    tai_khoan = StringField('Tài Khoản', validators=[InputRequired()])
+
+    # Thêm trường mật khẩu cũ và mật khẩu mới
+    mat_khau_cu = PasswordField('Mật khẩu cũ', validators=[InputRequired()])
+    mat_khau_moi = PasswordField('Mật khẩu mới', validators=[InputRequired(), Length(min=8)])
+    xac_nhan_mat_khau = PasswordField('Xác nhận mật khẩu mới', validators=[InputRequired(), EqualTo('mat_khau_moi',
+                                                                                                    message='Mật khẩu không khớp')])
+
+
+@app.route('/thay-doi-thong-tin', methods=['GET', 'POST'])
+@login_required
+def change_info():
+    form = ChangeInfoForm()
+
+    if isinstance(current_user, KhachHang):
+        form.ho_va_ten.data = current_user.hoVaTen
+        form.email.data = current_user.email
+        form.so_dien_thoai.data = current_user.soDienThoai
+        form.tai_khoan.data = current_user.taiKhoan
+
+    if form.validate_on_submit():
+        if isinstance(current_user, KhachHang):
+            current_user.hoVaTen = form.ho_va_ten.data
+            current_user.email = form.email.data
+            current_user.soDienThoai = form.so_dien_thoai.data
+            current_user.taiKhoan = form.tai_khoan.data
+            if form.mat_khau_moi.data:
+                current_user.matKhau = generate_password_hash(form.mat_khau_moi.data)
+
+        db.session.commit()
+        flash('Thông tin đã được cập nhật', 'success')
+        return redirect(url_for('change_info'))
+
+    return render_template('thaydoithongtin.html', form=form)
 
 if __name__ == '__main__':
     from cbapp.admin import *

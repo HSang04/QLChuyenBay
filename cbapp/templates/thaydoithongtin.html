@@ -1,0 +1,69 @@
+{% extends 'layout/base.html' %}
+
+{% block title %}Thay Đổi Thông Tin{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4 text-center">Thay Đổi Thông Tin</h2>
+
+    <!-- Hiển thị lỗi nếu có -->
+    {% if form.errors %}
+        <div class="alert alert-danger">
+            <ul>
+                {% for error in form.errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    <form method="POST" action="{{ url_for('change_info') }}">
+        {{ form.hidden_tag() }}
+
+        <!-- Họ và Tên -->
+        <div class="form-group">
+            <label for="ho_va_ten">Họ và Tên</label>
+            {{ form.ho_va_ten(class="form-control", placeholder="Nhập họ và tên") }}
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+            <label for="email">Email</label>
+            {{ form.email(class="form-control", placeholder="Nhập email") }}
+        </div>
+
+        <!-- Số Điện Thoại -->
+        <div class="form-group">
+            <label for="so_dien_thoai">Số Điện Thoại</label>
+            {{ form.so_dien_thoai(class="form-control", placeholder="Nhập số điện thoại") }}
+        </div>
+
+        <!-- Tài Khoản -->
+        <div class="form-group">
+            <label for="tai_khoan">Tài Khoản</label>
+            {{ form.tai_khoan(class="form-control", placeholder="Nhập tài khoản") }}
+        </div>
+
+        <!-- Mật khẩu cũ -->
+        <div class="form-group">
+            <label for="mat_khau_cu">Mật khẩu cũ</label>
+            {{ form.mat_khau_cu(class="form-control", placeholder="Nhập mật khẩu cũ") }}
+        </div>
+
+        <!-- Mật khẩu mới -->
+        <div class="form-group">
+            <label for="mat_khau_moi">Mật khẩu mới</label>
+            {{ form.mat_khau_moi(class="form-control", placeholder="Nhập mật khẩu mới") }}
+        </div>
+
+        <!-- Xác nhận mật khẩu mới -->
+        <div class="form-group">
+            <label for="xac_nhan_mat_khau">Xác nhận mật khẩu mới</label>
+            {{ form.xac_nhan_mat_khau(class="form-control", placeholder="Xác nhận mật khẩu mới") }}
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" class="btn btn-primary btn-block mt-4">Lưu Thay Đổi</button>
+    </form>
+</div>
+{% endblock %}
