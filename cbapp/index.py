@@ -15,7 +15,6 @@ def index():
 
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login_process():
     err_msg = None
@@ -396,12 +395,46 @@ def tracuu_chuyen_bay():
     chuyen_bays = ChuyenBay.query.all()
     return render_template('tracuuchuyenbay.html', chuyen_bays=chuyen_bays)
 
+
 @app.route('/xem-chuyen-bay/<int:maChuyenBay>')
 @login_required
 def xem_chuyen_bay(maChuyenBay):
-    # Lấy thông tin chi tiết chuyến bay
     chuyen_bay = ChuyenBay.query.get_or_404(maChuyenBay)
-    return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay)
+    ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).all()
+
+    # Tạo danh sách thông tin ghế và vé, bao gồm cả khách hàng nếu có
+    ghe_ve_info = []
+    for ghe in chuyen_bay.ghe:
+        # Lấy vé đã đặt cho ghế hiện tại, nếu có
+        ve = next((v for v in ve_list if v.maGhe == ghe.maGhe), None)
+
+        # Nếu vé có, lấy thông tin khách hàng từ vé
+        if ve:
+            khach_hang = {
+                'tenKhachHang': ve.tenKhachHang,
+                'soDienThoai': ve.soDienThoai
+            }
+        else:
+            khach_hang = None
+
+        # Thêm thông tin ghế và vé vào danh sách
+        ghe_ve_info.append({
+            'tenGhe': ghe.tenGhe,
+            'maGhe': ghe.maGhe,
+            'hangGhe': ghe.hangGhe,
+            've': ve,
+            'khachHang': khach_hang  # Thông tin khách hàng
+        })
+
+        # Ghi log thông tin ghế và vé
+        app.logger.info(f"Kiểm tra ghế: {ghe.tenGhe}, Mã Ghế: {ghe.maGhe}")
+        if ve:
+            app.logger.info(f"Mã vé: {ve.maVe} đã được đặt cho ghế {ghe.tenGhe} (Mã ghế: {ghe.maGhe})")
+        else:
+            app.logger.info(f"Không có vé cho ghế {ghe.tenGhe} (Mã ghế: {ghe.maGhe})")
+
+    return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
+
 
 if __name__ == '__main__':
     from cbapp.admin import *

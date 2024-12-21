@@ -22,18 +22,34 @@
                     <th>Ghế</th>
                     <th>Hạng Ghế</th>
                     <th>Trạng Thái</th>
+                    <th>Tên Khách Hàng</th>
+                    <th>Số Điện Thoại</th>
                 </tr>
             </thead>
             <tbody>
-                {% for ghe in chuyen_bay.ghe %}
+                {% for item in ghe_ve_info %}
                     <tr>
-                        <td>{{ ghe.tenGhe }}</td>
-                        <td>{{ ghe.hangGhe }}</td>
+                        <td>{{ item.tenGhe }}</td>
+                        <td>{{ item.hangGhe }}</td>
                         <td>
-                            {% if ghe.trangThai %}
+                            {% if item.ve %}
                                 <span class="badge bg-success">Đã Đặt</span>
                             {% else %}
                                 <span class="badge bg-warning">Còn Trống</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.khachHang %}
+                                {{ item.khachHang.tenKhachHang }}
+                            {% else %}
+                                <span class="text-muted">Trống</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.khachHang %}
+                                {{ item.khachHang.soDienThoai }}
+                            {% else %}
+                                <span class="text-muted">Trống</span>
                             {% endif %}
                         </td>
                     </tr>
