@@ -5,8 +5,8 @@ from flask_wtf import FlaskForm
 from cbapp import app, dao, login, db, create_db
 from cbapp.models import KhachHang, NhanVien, Ve
 
-from wtforms.fields.simple import StringField, EmailField, PasswordField
-from wtforms.validators import InputRequired, Email, Length, EqualTo
+from wtforms.fields.simple import StringField, EmailField, PasswordField, SubmitField
+from wtforms.validators import InputRequired, Email, Length, EqualTo, DataRequired
 
 
 @app.route('/')
@@ -424,46 +424,68 @@ def in_ve(ma_chuyen_bay):
                            so_ghes=so_ghes,
                            gia_ve_list=gia_ve_list)
 
-
 class ChangeInfoForm(FlaskForm):
-    ho_va_ten = StringField('Họ và Tên', validators=[InputRequired()])
-    email = EmailField('Email', validators=[InputRequired(), Email()])
-    so_dien_thoai = StringField('Số Điện Thoại', validators=[InputRequired()])
-    tai_khoan = StringField('Tài Khoản', validators=[InputRequired()])
-
-    # Thêm trường mật khẩu cũ và mật khẩu mới
-    mat_khau_cu = PasswordField('Mật khẩu cũ', validators=[InputRequired()])
-    mat_khau_moi = PasswordField('Mật khẩu mới', validators=[InputRequired(), Length(min=8)])
-    xac_nhan_mat_khau = PasswordField('Xác nhận mật khẩu mới', validators=[InputRequired(), EqualTo('mat_khau_moi',
-                                                                                                    message='Mật khẩu không khớp')])
-
+    ho_va_ten = StringField('Họ và tên', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    so_dien_thoai = StringField('Số điện thoại', validators=[DataRequired()])
+    tai_khoan = StringField('Tài khoản', validators=[DataRequired()])
+    submit = SubmitField('Cập nhật thông tin')
 
 @app.route('/thay-doi-thong-tin', methods=['GET', 'POST'])
 @login_required
 def change_info():
     form = ChangeInfoForm()
 
+    # Gán dữ liệu hiện tại của người dùng vào form
     if isinstance(current_user, KhachHang):
         form.ho_va_ten.data = current_user.hoVaTen
         form.email.data = current_user.email
         form.so_dien_thoai.data = current_user.soDienThoai
         form.tai_khoan.data = current_user.taiKhoan
 
+    # Xử lý khi form được submit
     if form.validate_on_submit():
-        if isinstance(current_user, KhachHang):
-            current_user.hoVaTen = form.ho_va_ten.data
-            current_user.email = form.email.data
-            current_user.soDienThoai = form.so_dien_thoai.data
-            current_user.taiKhoan = form.tai_khoan.data
-            if form.mat_khau_moi.data:
-                current_user.matKhau = generate_password_hash(form.mat_khau_moi.data)
+        try:
+            if isinstance(current_user, KhachHang):
+                current_user.hoVaTen = form.ho_va_ten.data
+                current_user.email = form.email.data
+                current_user.soDienThoai = form.so_dien_thoai.data
+                current_user.taiKhoan = form.tai_khoan.data
+            db.session.commit()
+            app.logger.info(f"{current_user.hoVaTen}, {current_user.email}, {current_user.soDienThoai}, {current_user.taiKhoan}")
 
-        db.session.commit()
-        flash('Thông tin đã được cập nhật', 'success')
+            flash('Thông tin đã được cập nhật', 'success')
+        except Exception as e:
+            db.session.rollback()  # Nếu có lỗi, rollback
+            flash(f'Có lỗi xảy ra: {str(e)}', 'danger')
+
         return redirect(url_for('change_info'))
 
     return render_template('thaydoithongtin.html', form=form)
 
+
+class ChangePasswordForm(FlaskForm):
+    mat_khau_cu = PasswordField('Mật khẩu cũ', validators=[DataRequired()])
+    mat_khau_moi = PasswordField('Mật khẩu mới', validators=[DataRequired(), Length(min=8)])
+    xac_nhan_mat_khau = PasswordField('Xác nhận mật khẩu mới', validators=[DataRequired(), EqualTo('mat_khau_moi')])
+    submit = SubmitField('Đổi Mật Khẩu')
+
+@app.route('/doi-mat-khau', methods=['GET', 'POST'])
+@login_required
+def doimatkhau():
+    form = ChangePasswordForm()
+
+    # Xử lý khi form được submit
+    if form.validate_on_submit():
+        if current_user.check_password(form.mat_khau_cu.data):  # Kiểm tra mật khẩu cũ
+            current_user.matKhau = generate_password_hash(form.mat_khau_moi.data)  # Cập nhật mật khẩu mới
+            db.session.commit()
+            flash('Mật khẩu đã được thay đổi', 'success')
+            return redirect(url_for('change_info'))
+        else:
+            flash('Mật khẩu cũ không đúng', 'danger')
+
+    return render_template('doimatkhau.html', form=form)
 
 @app.route('/tra-cuu-chuyen-bay')
 @login_required
