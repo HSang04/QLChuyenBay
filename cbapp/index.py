@@ -1,9 +1,11 @@
+from datetime import timedelta
+
 from flask import Flask, render_template, request, redirect, flash, url_for, session
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_wtf import FlaskForm
 
 from cbapp import app, dao, login, db, create_db
-from cbapp.models import KhachHang, NhanVien, Ve
+from cbapp.models import KhachHang, NhanVien, Ve, LichSuGiaoDich
 
 from wtforms.fields.simple import StringField, EmailField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Email, Length, EqualTo, DataRequired
@@ -237,7 +239,7 @@ def thanh_toan():
 
                 # Tạo vé với đầy đủ thông tin
                 ve = Ve(
-                    tinhTrangVe='Đã bán',
+                    tinhTrangVe='Đã đặt',
                     maChuyenBay=chuyenBay.maChuyenBay,
                     maKhachHang=current_user.maKhachHang,
                     maGhe=ghe_con_lai.maGhe,
@@ -249,6 +251,20 @@ def thanh_toan():
                     giaVe=gia_ve
                 )
                 db.session.add(ve)
+                db.session.commit()
+
+                # Lưu thông tin giao dịch vào LichSuGiaoDich
+                giao_dich = LichSuGiaoDich(
+                    maChuyenBay=chuyenBay.maChuyenBay,
+                    maKhachHang=current_user.maKhachHang,  # Lưu maKhachHang thay vì các thông tin khác
+                    loaiVe=loai_ve,
+                    soLuongVe=so_luong_ve,
+                    giaVe=gia_ve,
+                    tinhTrangVe='Đã đặt',
+                    thoiGianGiaoDich = datetime.now(),
+                    tenGhe = ghe_con_lai.tenGhe
+                )
+                db.session.add(giao_dich)
                 db.session.commit()
 
             # Xóa thông tin vé khỏi session sau khi thanh toán thành công
@@ -263,7 +279,6 @@ def thanh_toan():
 
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
-
 
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
@@ -551,27 +566,22 @@ def hien_thi_ve():
 
 
 @app.route('/lich_su_giao_dich', methods=['GET'])
-@login_required  # Đảm bảo rằng người dùng phải đăng nhập
+@login_required
 def lich_su_giao_dich():
-    # Kiểm tra nếu là khách hàng
+
     if isinstance(current_user, KhachHang):
-        # Lấy danh sách vé của khách hàng hiện tại
-        ves = Ve.query.filter_by(maKhachHang=current_user.maKhachHang).all()
-    elif isinstance(current_user, NhanVien):
-        # Nếu là nhân viên, lấy danh sách vé mà nhân viên đã bán
-        ves = Ve.query.filter_by(maNhanVien=current_user.maNhanVien).all()
+        giao_dichs = LichSuGiaoDich.query.filter_by(maKhachHang=current_user.maKhachHang).all()
     else:
         flash("Bạn không có quyền truy cập lịch sử giao dịch!", "danger")
         return redirect(url_for('index'))
 
     # Nếu không có giao dịch nào
-    if not ves:
+    if not giao_dichs:
         flash("Bạn chưa có giao dịch nào.", "info")
-        return render_template('lichsugiaodich.html', giao_dichs=ves)
+        return render_template('lichsugiaodich.html', giao_dichs=giao_dichs)
 
     # Trả về trang hiển thị lịch sử giao dịch với thông tin các vé
-    return render_template('lichsugiaodich.html', giao_dichs=ves)
-
+    return render_template('lichsugiaodich.html', giao_dichs=giao_dichs)
 
 
 @app.route('/hoso')

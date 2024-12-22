@@ -197,6 +197,30 @@ class Ve(db.Model):
     soDienThoai = Column(String(15), nullable=True)  # Có thể bỏ trống
     email = Column(String(100), nullable=True)  # Có thể bỏ trống
 
+class LichSuGiaoDich(db.Model):
+    __tablename__ = 'lichsugiaodich'
+    id = db.Column(db.Integer, primary_key=True)
+    maChuyenBay = db.Column(db.Integer, db.ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
+    maKhachHang = db.Column(db.Integer, db.ForeignKey('khachhang.maKhachHang'), nullable=False)
+    loaiVe = db.Column(db.String(50), nullable=False)
+    soLuongVe = db.Column(db.Integer, nullable=False)
+    giaVe = db.Column(db.Float, nullable=False)
+    tinhTrangVe = db.Column(db.String(50), default='Đã đặt')
+    thoiGianGiaoDich = db.Column(db.DateTime, default=datetime.utcnow)
+    tenGhe = db.Column(db.String(50), nullable=False)
+
+    # Tham chiếu tới khách hàng (để tránh lặp lại thông tin)
+    khachHang = db.relationship('KhachHang', backref=db.backref('lichSuGiaoDichs', lazy=True))
+
+    # Tham chiếu tới chuyến bay
+    chuyenBay = db.relationship('ChuyenBay', backref=db.backref('lichSuGiaoDichs', lazy=True))
+
+    def __repr__(self):
+        return f'<LichSuGiaoDich {self.id}, KhachHang {self.maKhachHang}, ChuyenBay {self.maChuyenBay}>'
+
+
+
+
 
 
 if __name__ == '__main__':
