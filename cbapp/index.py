@@ -436,12 +436,12 @@ class ChangeInfoForm(FlaskForm):
 def change_info():
     form = ChangeInfoForm()
 
-    # Gán dữ liệu hiện tại của người dùng vào form
-    if isinstance(current_user, KhachHang):
-        form.ho_va_ten.data = current_user.hoVaTen
-        form.email.data = current_user.email
-        form.so_dien_thoai.data = current_user.soDienThoai
-        form.tai_khoan.data = current_user.taiKhoan
+    if request.method == 'GET':
+        if isinstance(current_user, KhachHang):
+            form.ho_va_ten.data = current_user.hoVaTen
+            form.email.data = current_user.email
+            form.so_dien_thoai.data = current_user.soDienThoai
+            form.tai_khoan.data = current_user.taiKhoan
 
     # Xử lý khi form được submit
     if form.validate_on_submit():
