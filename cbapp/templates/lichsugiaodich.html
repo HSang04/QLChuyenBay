@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="container mt-5">
+        <h2>Lịch sử giao dịch</h2>
+
+        {% if giao_dichs %}
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Ngày đặt vé</th>
+                        <th>Chuyến bay</th>
+                        <th>Hạng vé</th>
+                        <th>Giá vé</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ve in giao_dichs %}
+                    <tr>
+                        <td>{{ loop.index }}</td>
+                        <td>{{ ve.chuyenBay.gioDi.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ ve.chuyenBay.tuyenBay.tenTuyenBay }}</td>
+                        <td>{{ ve.hangVe.tenHangVe }}</td>
+                        <td>{{ "{:,.0f}".format(ve.giaVe) }} VND</td>
+                        <td>{{ ve.tinhTrangVe }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <div class="alert alert-info">
+                Bạn chưa có giao dịch nào.
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

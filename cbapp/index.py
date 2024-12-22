@@ -132,61 +132,138 @@ def tim_chuyen_bay():
 @app.route('/dat_ve/<int:ma_chuyen_bay>', methods=['GET', 'POST'])
 def dat_ve(ma_chuyen_bay):
     if not current_user.is_authenticated:
-        return render_template('login.html')
+        flash('Vui lòng đăng nhập trước khi đặt vé.', 'warning')
+        return redirect(url_for('login'))
 
+    # Lấy thông tin chuyến bay
     chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
-    total_price = None  # Biến tổng giá vé
-    so_luong_ve = 0
-    loai_ve = ''
 
-    # Tính giá vé cho từng loại vé
+    # Kiểm tra số ghế còn lại
+    soGheThuongGiaConLai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='ThuongGia', trangThai=False).count()
+    soGhePhoThongConLai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='PhoThong', trangThai=False).count()
+
+    # Tính giá vé
     gia_ve_thuong_gia = chuyenBay.tinh_gia_ve('ThuongGia', datetime.now().strftime("%d/%m/%Y %H:%M"))
     gia_ve_pho_thong = chuyenBay.tinh_gia_ve('PhoThong', datetime.now().strftime("%d/%m/%Y %H:%M"))
 
+    # Thông tin khách hàng mặc định
+    ten_khach_hang = current_user.hoVaTen
+    so_dien_thoai = current_user.soDienThoai
+    email = current_user.email
+
     if request.method == 'POST':
+        # Lấy thông tin từ form
         so_luong_ve = int(request.form['so_luong_ve'])
         loai_ve = request.form.get('loai_ve')
 
-        # Xác định giá vé dựa trên loại vé đã chọn
-        if loai_ve == 'ThuongGia':
-            gia_ve = gia_ve_thuong_gia
-        elif loai_ve == 'PhoThong':
-            gia_ve = gia_ve_pho_thong
+        # Dùng thông tin mặc định từ current_user nếu không có thông tin trong form
+        ten_khach_hang = request.form.get('ten_khach_hang') or ten_khach_hang
+        so_dien_thoai = request.form.get('so_dien_thoai') or so_dien_thoai
+        email = request.form.get('email') or email
+
+        # Lưu tạm thời thông tin đặt vé vào session
+        session['dat_ve'] = {
+            'ma_chuyen_bay': ma_chuyen_bay,
+            'so_luong_ve': so_luong_ve,
+            'loai_ve': loai_ve,
+            'ten_khach_hang': ten_khach_hang,
+            'so_dien_thoai': so_dien_thoai,
+            'email': email,
+            'gia_ve_thuong_gia': gia_ve_thuong_gia,
+            'gia_ve_pho_thong': gia_ve_pho_thong
+        }
+
+        # Kiểm tra số lượng ghế trống
+        if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
+            flash('Thất bại: Không đủ ghế Thương Gia.', 'danger')
+            return redirect(url_for('dat_ve', ma_chuyen_bay=ma_chuyen_bay))
+        if loai_ve == 'PhoThong' and so_luong_ve > soGhePhoThongConLai:
+            flash('Thất bại: Không đủ ghế Phổ Thông.', 'danger')
+            return redirect(url_for('dat_ve', ma_chuyen_bay=ma_chuyen_bay))
 
         # Tính tổng giá vé
+        gia_ve = gia_ve_thuong_gia if loai_ve == 'ThuongGia' else gia_ve_pho_thong
         total_price = gia_ve * so_luong_ve
 
-        # Chuyển hướng tới trang ThanhToan và truyền các tham số
-        return redirect(url_for('thanh_toan', ma_chuyen_bay=ma_chuyen_bay, total_price=total_price,
-                                loai_ve=loai_ve, so_luong_ve=so_luong_ve))
+        # Chuyển hướng đến trang thanh toán
+        return redirect(url_for('thanh_toan', ma_chuyen_bay=ma_chuyen_bay, total_price=total_price, loai_ve=loai_ve,
+                                so_luong_ve=so_luong_ve))
 
-    # Format giờ bay để hiển thị
+    # Format giờ bay
     gio_di_formatted = chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y")
     gio_den_formatted = chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y")
 
     return render_template('datve.html', chuyenBay=chuyenBay,
                            gia_ve_thuong_gia=gia_ve_thuong_gia, gia_ve_pho_thong=gia_ve_pho_thong,
                            gio_di_formatted=gio_di_formatted, gio_den_formatted=gio_den_formatted,
-                           total_price=total_price)
+                           ten_khach_hang=ten_khach_hang, so_dien_thoai=so_dien_thoai, email=email)
 
 @app.route('/thanh_toan', methods=['GET', 'POST'])
 def thanh_toan():
     # Lấy các tham số từ query string
     ma_chuyen_bay = request.args.get('ma_chuyen_bay')
-    total_price = request.args.get('total_price')
+    total_price = float(request.args.get('total_price'))  # Chuyển đổi tổng giá vé sang kiểu float
     loai_ve = request.args.get('loai_ve')
-    so_luong_ve = request.args.get('so_luong_ve')
+    so_luong_ve = int(request.args.get('so_luong_ve'))  # Số lượng vé cần được chuyển thành int
 
     if request.method == 'POST':
-        # Thực hiện thanh toán (có thể thêm logic thanh toán ở đây)
+        # Giả sử thanh toán thành công, có thể thêm logic thanh toán thực tế ở đây
         flash("Thanh toán thành công!", 'success')
-        return redirect('/trangchu')
+
+        # Lấy dữ liệu đặt vé từ session
+        dat_ve = session.get('dat_ve')
+
+        if dat_ve:
+            # Lấy thông tin chuyến bay
+            chuyenBay = ChuyenBay.query.get_or_404(dat_ve['ma_chuyen_bay'])
+            loai_ve = dat_ve['loai_ve']
+            so_luong_ve = dat_ve['so_luong_ve']
+            ten_khach_hang = dat_ve['ten_khach_hang']
+            so_dien_thoai = dat_ve['so_dien_thoai']
+            email = dat_ve['email']
+            gia_ve_thuong_gia = dat_ve['gia_ve_thuong_gia']
+            gia_ve_pho_thong = dat_ve['gia_ve_pho_thong']
+
+            # Tính tổng giá vé
+            gia_ve = gia_ve_thuong_gia if loai_ve == 'ThuongGia' else gia_ve_pho_thong
+            total_price = gia_ve * so_luong_ve
+
+            # Tìm các ghế trống và cập nhật trạng thái ghế
+            ghe_trong = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe=loai_ve, trangThai=False).limit(so_luong_ve).all()
+
+            for ghe_con_lai in ghe_trong:
+                ghe_con_lai.trangThai = True  # Đánh dấu ghế đã được đặt
+                db.session.commit()
+
+                # Tạo vé với đầy đủ thông tin
+                ve = Ve(
+                    tinhTrangVe='Đã bán',
+                    maChuyenBay=chuyenBay.maChuyenBay,
+                    maKhachHang=current_user.maKhachHang,
+                    maGhe=ghe_con_lai.maGhe,
+                    maHangVe=1 if loai_ve == 'ThuongGia' else 2,  # Đặt mã loại vé
+                    maNhanVien=None,  # Không có nhân viên xử lý
+                    tenKhachHang=ten_khach_hang,
+                    soDienThoai=so_dien_thoai,
+                    email=email,
+                    giaVe=gia_ve
+                )
+                db.session.add(ve)
+                db.session.commit()
+
+            # Xóa thông tin vé khỏi session sau khi thanh toán thành công
+            session.pop('dat_ve', None)
+
+        # Chuyển hướng sang trang hiển thị vé đã thanh toán
+        return redirect(url_for('hien_thi_ve', ma_chuyen_bay=ma_chuyen_bay, total_price=total_price,
+                                loai_ve=loai_ve, so_luong_ve=so_luong_ve))
 
     # Lấy thông tin chuyến bay từ cơ sở dữ liệu
     chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
 
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
+
 
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
@@ -434,6 +511,45 @@ def xem_chuyen_bay(maChuyenBay):
             app.logger.info(f"Không có vé cho ghế {ghe.tenGhe} (Mã ghế: {ghe.maGhe})")
 
     return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
+
+@app.route('/hien_thi_ve', methods=['GET', 'POST'])
+def hien_thi_ve():
+
+
+    ma_chuyen_bay = request.args.get('ma_chuyen_bay')
+    total_price = request.args.get('total_price')
+    loai_ve = request.args.get('loai_ve')
+    so_luong_ve = request.args.get('so_luong_ve')
+
+    chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
+
+    return render_template('vethanhtoan.html',
+                           chuyenBay=chuyenBay,total_price=total_price,ma_chuyen_bay=ma_chuyen_bay,
+                           loai_ve=loai_ve,so_luong_ve=so_luong_ve)
+
+
+@app.route('/lich_su_giao_dich', methods=['GET'])
+@login_required  # Đảm bảo rằng người dùng phải đăng nhập
+def lich_su_giao_dich():
+    # Kiểm tra nếu là khách hàng
+    if isinstance(current_user, KhachHang):
+        # Lấy danh sách vé của khách hàng hiện tại
+        ves = Ve.query.filter_by(maKhachHang=current_user.maKhachHang).all()
+    elif isinstance(current_user, NhanVien):
+        # Nếu là nhân viên, lấy danh sách vé mà nhân viên đã bán
+        ves = Ve.query.filter_by(maNhanVien=current_user.maNhanVien).all()
+    else:
+        flash("Bạn không có quyền truy cập lịch sử giao dịch!", "danger")
+        return redirect(url_for('index'))
+
+    # Nếu không có giao dịch nào
+    if not ves:
+        flash("Bạn chưa có giao dịch nào.", "info")
+        return render_template('lichsugiaodich.html', giao_dichs=ves)
+
+    # Trả về trang hiển thị lịch sử giao dịch với thông tin các vé
+    return render_template('lichsugiaodich.html', giao_dichs=ves)
+
 
 
 @app.route('/hoso')

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vé Đã Thanh Toán</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+        .ticket-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px;
+        }
+        .ticket {
+            background-color: white;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+            padding: 20px;
+            width: 300px;
+        }
+        .ticket h2 {
+            text-align: center;
+            margin-top: 0;
+        }
+        .ticket p {
+            margin: 5px 0;
+        }
+        .home-button {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            margin-bottom: 20px
+        }
+        .home-button a {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .home-button a:hover {
+            background-color: #0056b3;
+        }
+        header {
+            background-color: #007BFF;
+            color: white;
+            padding: 10px 0;
+            text-align: center;
+        }
+        footer {
+            text-align: center;
+            padding: 10px 0;
+            background-color: #007BFF;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Vé Đã Thanh Toán</h1>
+    </header>
+    <main>
+        <div class="ticket-container">
+            <div class="ticket">
+                <h2>Thông Tin Chuyến Bay</h2>
+                <p><strong>Mã Chuyến Bay:</strong> {{ chuyenBay.maChuyenBay }}</p>
+                <p><strong>Tên Tuyến Bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
+                <p><strong>Giờ đi:</strong> {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</p>
+                <p><strong>Giá Vé:</strong> {{ total_price }} VND</p>
+                <p><strong>Loại Vé:</strong> {{ loai_ve }}</p>
+                <p><strong>Số Lượng Vé:</strong> {{ so_luong_ve }}</p>
+            </div>
+        </div>
+        <div class="home-button">
+            <a href="{{ url_for('index') }}">Trở về trang chủ</a>
+        </div>
+    </main>
+
+    <footer>
+        <p>Chúc bạn có một chuyến bay an toàn và thú vị!</p>
+    </footer>
+</body>
+</html>
