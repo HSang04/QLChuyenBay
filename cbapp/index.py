@@ -62,6 +62,76 @@ def logout():
     flash('Bạn đã đăng xuất thành công!', 'success')
     return redirect('/login')
 
+@app.route('/dangky', methods=['GET', 'POST'])
+def dang_ky():
+    form_data = {}
+    if request.method == 'POST':
+        # Lấy dữ liệu từ form đăng ký
+        form_data['hoVaTen'] = request.form.get('hoVaTen')
+        form_data['email'] = request.form.get('email')
+        form_data['soDienThoai'] = request.form.get('soDienThoai')
+        form_data['taiKhoan'] = request.form.get('taiKhoan')
+        form_data['cccd'] = request.form.get('cccd')
+        matKhau = request.form.get('matKhau')
+        xacNhanMatKhau = request.form.get('xacNhanMatKhau')
+
+        # Kiểm tra mật khẩu và xác nhận mật khẩu
+        if matKhau != xacNhanMatKhau:
+            flash("Mật khẩu và xác nhận mật khẩu không trùng khớp. Vui lòng nhập lại.", "danger")
+            form_data.pop('matKhau', None)
+            form_data.pop('xacNhanMatKhau', None)
+            return render_template('dangky.html', form_data=form_data)
+
+        # Kiểm tra tài khoản, email, số điện thoại và CCCD đã tồn tại chưa
+        khach_hang_ton_tai = KhachHang.query.filter(
+            (KhachHang.taiKhoan == form_data['taiKhoan']) |
+            (KhachHang.email == form_data['email']) |
+            (KhachHang.soDienThoai == form_data['soDienThoai']) |
+            (KhachHang.cccd == form_data['cccd'])
+        ).first()
+
+        if khach_hang_ton_tai:
+            if KhachHang.query.filter_by(taiKhoan=form_data['taiKhoan']).first():
+                flash("Tài khoản đã tồn tại. Vui lòng nhập tài khoản khác.", "danger")
+                form_data.pop('taiKhoan', None)
+
+            if KhachHang.query.filter_by(email=form_data['email']).first():
+                flash("Email đã tồn tại. Vui lòng nhập email khác.", "danger")
+                form_data.pop('email', None)
+
+            if KhachHang.query.filter_by(soDienThoai=form_data['soDienThoai']).first():
+                flash("Số điện thoại đã tồn tại. Vui lòng nhập số khác.", "danger")
+                form_data.pop('soDienThoai', None)
+
+            if KhachHang.query.filter_by(cccd=form_data['cccd']).first():
+                flash("CCCD đã tồn tại. Vui lòng nhập CCCD khác.", "danger")
+                form_data.pop('cccd', None)
+
+            return render_template('dangky.html', form_data=form_data)
+
+        # Tạo đối tượng khách hàng mới
+        khach_hang_moi = KhachHang(
+            hoVaTen=form_data['hoVaTen'],
+            email=form_data['email'],
+            soDienThoai=form_data['soDienThoai'],
+            taiKhoan=form_data['taiKhoan'],
+            cccd=form_data['cccd'],
+            active=True
+        )
+        khach_hang_moi.set_password(matKhau)  # Mã hóa mật khẩu
+
+        # Lưu vào cơ sở dữ liệu
+        try:
+            db.session.add(khach_hang_moi)
+            db.session.commit()
+            flash("Đăng ký thành công! Vui lòng đăng nhập.", "success")
+            return redirect(url_for('login_process'))
+        except Exception as e:
+            db.session.rollback()
+            flash("Có lỗi xảy ra. Vui lòng thử lại.", "danger")
+
+    return render_template('dangky.html', form_data=form_data)
+
 
 @login.user_loader
 def load_user(user_id):
