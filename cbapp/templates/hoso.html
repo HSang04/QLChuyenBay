@@ -4,31 +4,75 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h1>Thông Tin Hồ Sơ</h1>
-    <table class="table table-bordered mt-4">
-        <tbody>
-            <tr>
-                <th>Tên Đăng Nhập</th>
-                <td>{{ user_info.username }}</td>
-            </tr>
-            <tr>
-                <th>Email</th>
-                <td>{{ user_info.email }}</td>
-            </tr>
-            <tr>
-                <th>Họ và Tên</th>
-                <td>{{ user_info.hoVaTen }}</td>
-            </tr>
-            <tr>
-                <th>CCCD</th>
-                <td>{{ user_info.cccd }}</td>
-            </tr>
-            <tr>
-                <th>Số Điện Thoại</th>
-                <td>{{ user_info.soDienThoai }}</td>
-            </tr>
+    <!-- Tiêu đề -->
+    <h1 class="text-center text-primary mb-4 fw-bold">Thông Tin Hồ Sơ</h1>
 
-        </tbody>
-    </table>
+    <!-- Bảng thông tin -->
+    <div class="card shadow-lg border-0">
+        <div class="card-body p-4">
+            <table class="table table-borderless">
+                <tbody>
+                    <tr>
+                        <th class="text-secondary w-25">Tên Đăng Nhập:</th>
+                        <td class="fw-bold">{{ user_info.username }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-secondary">Email:</th>
+                        <td class="fw-bold">{{ user_info.email }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-secondary">Họ và Tên:</th>
+                        <td class="fw-bold">{{ user_info.hoVaTen }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-secondary">CCCD:</th>
+                        <td class="fw-bold">{{ user_info.cccd }}</td>
+                    </tr>
+                    <tr>
+                        <th class="text-secondary">Số Điện Thoại:</th>
+                        <td class="fw-bold">{{ user_info.soDienThoai }}</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+<!-- CSS tùy chỉnh -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #f4f9fc, #e6eef3);
+    }
+
+    h1 {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+
+    .card {
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .table th {
+        font-size: 1rem;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    .table td {
+        font-size: 1rem;
+        vertical-align: middle;
+    }
+
+    .text-secondary {
+        color: #6c757d;
+    }
+
+    .fw-bold {
+        font-weight: 600;
+    }
+</style>
 {% endblock %}

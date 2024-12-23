@@ -3,52 +3,80 @@
 {% block title %}Đăng Ký{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2>Đăng ký tài khoản</h2>
-    {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
+<div class="d-flex justify-content-center align-items-center vh-100"
+     style="background: linear-gradient(to right, #4facfe, #00f2fe);">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 500px; border-radius: 15px;">
+        <h2 class="text-center text-primary fw-bold mb-4">Đăng Ký Tài Khoản</h2>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
         <div>
             {% for category, message in messages %}
-                <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+            <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
             {% endfor %}
         </div>
-    {% endif %}
-    {% endwith %}
-    <form method="post" action="{{ url_for('dang_ky') }}">
-        <div class="mb-3">
-            <label for="hoVaTen" class="form-label">Họ và tên</label>
-            <input type="text" class="form-control" id="hoVaTen" name="hoVaTen"
-                   value="{{ form_data.get('hoVaTen', '') }}" required>
+        {% endif %}
+        {% endwith %}
+
+        <!-- Form Đăng Ký -->
+        <form method="post" action="{{ url_for('dang_ky') }}">
+            <!-- Họ và tên -->
+            <div class="mb-3">
+                <label for="hoVaTen" class="form-label fw-semibold">Họ và tên</label>
+                <input type="text" class="form-control" id="hoVaTen" name="hoVaTen"
+                       value="{{ form_data.get('hoVaTen', '') }}" placeholder="Nhập họ và tên" required>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3">
+                <label for="email" class="form-label fw-semibold">Email</label>
+                <input type="email" class="form-control" id="email" name="email"
+                       value="{{ form_data.get('email', '') }}" placeholder="Nhập email" required>
+            </div>
+
+            <!-- Số điện thoại -->
+            <div class="mb-3">
+                <label for="soDienThoai" class="form-label fw-semibold">Số điện thoại</label>
+                <input type="text" class="form-control" id="soDienThoai" name="soDienThoai"
+                       value="{{ form_data.get('soDienThoai', '') }}" placeholder="Nhập số điện thoại" required>
+            </div>
+
+            <!-- CCCD -->
+            <div class="mb-3">
+                <label for="cccd" class="form-label fw-semibold">CCCD</label>
+                <input type="text" class="form-control" id="cccd" name="cccd"
+                       value="{{ form_data.get('cccd', '') }}" placeholder="Nhập số CCCD" required>
+            </div>
+
+            <!-- Tài khoản -->
+            <div class="mb-3">
+                <label for="taiKhoan" class="form-label fw-semibold">Tài khoản</label>
+                <input type="text" class="form-control" id="taiKhoan" name="taiKhoan"
+                       value="{{ form_data.get('taiKhoan', '') }}" placeholder="Nhập tài khoản" required>
+            </div>
+
+            <!-- Mật khẩu -->
+            <div class="mb-3">
+                <label for="matKhau" class="form-label fw-semibold">Mật khẩu</label>
+                <input type="password" class="form-control" id="matKhau" name="matKhau" placeholder="Nhập mật khẩu" required>
+            </div>
+
+            <!-- Xác nhận mật khẩu -->
+            <div class="mb-3">
+                <label for="xacNhanMatKhau" class="form-label fw-semibold">Xác nhận mật khẩu</label>
+                <input type="password" class="form-control" id="xacNhanMatKhau" name="xacNhanMatKhau"
+                       placeholder="Nhập lại mật khẩu" required>
+            </div>
+
+            <!-- Nút Đăng Ký -->
+            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">Đăng Ký</button>
+        </form>
+
+        <!-- Link Đăng Nhập -->
+        <div class="text-center mt-3">
+            <p class="text-muted">Đã có tài khoản? <a href="/login" class="text-primary fw-bold">Đăng nhập ngay</a></p>
         </div>
-        <div class="mb-3">
-            <label for="email" class="form-label">Email</label>
-            <input type="email" class="form-control" id="email" name="email"
-                   value="{{ form_data.get('email', '') }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="soDienThoai" class="form-label">Số điện thoại</label>
-            <input type="text" class="form-control" id="soDienThoai" name="soDienThoai"
-                   value="{{ form_data.get('soDienThoai', '') }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="cccd" class="form-label">CCCD</label>
-            <input type="text" class="form-control" id="cccd" name="cccd"
-                   value="{{ form_data.get('cccd', '') }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="taiKhoan" class="form-label">Tài khoản</label>
-            <input type="text" class="form-control" id="taiKhoan" name="taiKhoan"
-                   value="{{ form_data.get('taiKhoan', '') }}" required>
-        </div>
-        <div class="mb-3">
-            <label for="matKhau" class="form-label">Mật khẩu</label>
-            <input type="password" class="form-control" id="matKhau" name="matKhau" required>
-        </div>
-        <div class="mb-3">
-            <label for="xacNhanMatKhau" class="form-label">Xác nhận mật khẩu</label>
-            <input type="password" class="form-control" id="xacNhanMatKhau" name="xacNhanMatKhau" required>
-        </div>
-        <button type="submit" class="btn btn-primary">Đăng ký</button>
-    </form>
+    </div>
 </div>
 {% endblock %}

@@ -4,24 +4,62 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="text-center">Thanh Toán</h2>
+    <h2 class="text-center text-uppercase fw-bold" style="color: #007BFF; margin-bottom: 30px;">Thanh Toán</h2>
 
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
-                <div class="card-body">
-                    <h5 class="card-title">Thông tin chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
-                    <p><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
-                    <p><strong>Số lượng vé:</strong> {{ so_luong_ve }}</p>
-                    <p><strong>Loại vé:</strong> {{ loai_ve }}</p>
-                    <p><strong>Tổng giá:</strong> {{ total_price }} VND</p>
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-4">
+                    <h5 class="card-title text-primary fw-bold">Thông Tin Chuyến Bay</h5>
+                    <p class="mb-2"><strong>Tuyến Bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
+                    <p class="mb-2"><strong>Số Lượng Vé:</strong> {{ so_luong_ve }}</p>
+                    <p class="mb-2"><strong>Loại Vé:</strong> {{ loai_ve }}</p>
+                    <p class="mb-4"><strong>Tổng Giá:</strong>
+                        <span class="text-danger fw-bold">{{ "{:,.0f}".format(total_price) }} VND</span>
+                    </p>
 
                     <form method="POST">
-                        <button type="submit" class="btn btn-success">Xác nhận thanh toán</button>
+                        <button type="submit" class="btn btn-success btn-lg w-100 fw-bold shadow-sm">
+                            Xác Nhận Thanh Toán
+                        </button>
                     </form>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- CSS tùy chỉnh -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #f4f9fc, #e6eef3);
+    }
+
+    h2 {
+        letter-spacing: 1px;
+    }
+
+    .card {
+        border-radius: 15px;
+        background: #fff;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-body p {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background-color: #218838;
+        transform: scale(1.05);
+    }
+</style>
 {% endblock %}

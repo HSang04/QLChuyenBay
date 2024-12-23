@@ -3,84 +3,97 @@
 {% block title %}Bán Vé Chuyến Bay{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-    <h2 class="text-center">Đặt Vé Chuyến Bay</h2>
+<div class="d-flex justify-content-center align-items-center vh-100" style="background: linear-gradient(to right, #4facfe, #00f2fe);">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 600px; border-radius: 15px;">
+        <h2 class="text-center text-primary fw-bold mb-4">Đặt Vé Chuyến Bay</h2>
 
-    <!-- Hiển thị thông báo nếu có -->
-    <div class="row">
-        <div class="col-md-6 offset-md-3">
-            <div class="card">
+        <div class="card-body">
+            <!-- Thông tin chuyến bay -->
+            <h5 class="card-title text-success fw-bold">Chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
+            <p><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
+            <p><strong>Giờ đi:</strong> {{ gio_di_formatted }}</p>
+            <p><strong>Giờ đến:</strong> {{ gio_den_formatted }}</p>
+
+            <div class="card shadow-sm border-0 mt-4">
                 <div class="card-body">
-                    <h5 class="card-title">Chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
-                    <p><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
-                    <p><strong>Giờ đi:</strong> {{ gio_di_formatted }}</p>
-                    <p><strong>Giờ đến:</strong> {{ gio_den_formatted }}</p>
+                    <h5 class="text-secondary text-center">Số Ghế Còn Lại</h5>
+                    <div class="row text-center">
+                        <!-- Phổ thông -->
+                        <div class="col-6">
+                            <i class="bi bi-person-fill" style="font-size: 2rem; color: #3498db;"></i>
+                            <h6 class="text-secondary mt-2">Phổ Thông</h6>
+                            <h5 class="text-danger fw-bold">{{ soGhePhoThongConLai }}</h5>
+                            <p class="text-muted">ghế còn lại</p>
+                        </div>
 
-                    <!-- Hiển thị số ghế còn lại -->
-                    <div class="alert alert-info">
-                        <strong>Ghế còn lại:</strong>
-                        <br>
-                        Phổ thông: {{ soGhePhoThongConLai }} ghế còn
-                        <br>
-                        Thương gia: {{ soGheThuongGiaConLai }} ghế còn
+                        <!-- Thương gia -->
+                        <div class="col-6">
+                            <i class="bi bi-person-check-fill" style="font-size: 2rem; color: #e74c3c;"></i>
+                            <h6 class="text-secondary mt-2">Thương Gia</h6>
+                            <h5 class="text-danger fw-bold">{{ soGheThuongGiaConLai }}</h5>
+                            <p class="text-muted">ghế còn lại</p>
+                        </div>
                     </div>
-
-                    <form method="POST">
-                        <!-- Hiển thị giá vé 1 vé -->
-                        <div class="mb-3">
-                            <label class="form-label">Giá vé 1 vé</label>
-                            <div>
-                                <p><strong>Phổ thông:</strong> <span class="price-text">{{ "{:,.0f}".format(gia_ve_pho_thong) }}</span> VND</p>
-                                <p><strong>Thương gia:</strong> <span class="price-text">{{ "{:,.0f}".format(gia_ve_thuong_gia) }}</span> VND</p>
-                            </div>
-                        </div>
-
-                        <!-- Số lượng vé -->
-                        <div class="mb-3">
-                            <label for="so_luong_ve" class="form-label">Số lượng vé</label>
-                            <input type="number" class="form-control" id="so_luong_ve" name="so_luong_ve" required min="1">
-                        </div>
-
-                        <!-- Loại vé -->
-                        <div class="mb-3">
-                            <label for="loai_ve" class="form-label">Loại vé</label>
-                            <select class="form-select" id="loai_ve" name="loai_ve">
-                                <option value="PhoThong">Phổ thông</option>
-                                <option value="ThuongGia">Thương gia</option>
-                            </select>
-                        </div>
-
-                        <!-- Nút Bán Vé -->
-                        <button type="submit" class="btn btn-primary">Bán Vé</button>
-                    </form>
-
-                    <!-- Thông báo lỗi nếu số ghế không đủ -->
-                    {% if flash_messages %}
-                        <div class="mt-3">
-                            <ul class="alert alert-danger">
-                                {% for message in flash_messages %}
-                                    <li>{{ message }}</li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    {% endif %}
                 </div>
             </div>
+
+
+            <!-- Form bán vé -->
+            <form method="POST" class="mt-4">
+                <!-- Giá vé -->
+                <div class="mb-3">
+                    <h6 class="text-secondary">Giá vé:</h6>
+                    <p><strong>Phổ thông:</strong> <span class="price-text">{{ "{:,.0f}".format(gia_ve_pho_thong) }}</span> VND</p>
+                    <p><strong>Thương gia:</strong> <span class="price-text">{{ "{:,.0f}".format(gia_ve_thuong_gia) }}</span> VND</p>
+                </div>
+
+                <!-- Số lượng vé -->
+                <div class="mb-3">
+                    <label for="so_luong_ve" class="form-label">Số lượng vé</label>
+                    <input type="number" class="form-control" id="so_luong_ve" name="so_luong_ve" required min="1" placeholder="Nhập số lượng vé">
+                </div>
+
+                <!-- Loại vé -->
+                <div class="mb-3">
+                    <label for="loai_ve" class="form-label">Loại vé</label>
+                    <select class="form-select" id="loai_ve" name="loai_ve">
+                        <option value="PhoThong">Phổ thông</option>
+                        <option value="ThuongGia">Thương gia</option>
+                    </select>
+                </div>
+
+                <!-- Nút bán vé -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">Bán Vé</button>
+                </div>
+            </form>
+
+            <!-- Thông báo lỗi -->
+            {% if flash_messages %}
+            <div class="alert alert-danger mt-4">
+                <ul class="list-unstyled">
+                    {% for message in flash_messages %}
+                    <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+            {% endif %}
         </div>
     </div>
 </div>
 
-<!-- Thêm CSS để làm nổi bật giá vé -->
+<!-- CSS cải tiến -->
 <style>
     .price-text {
         color: #e74c3c;  /* Màu đỏ nổi bật */
-        font-size: 1.2rem;
+        font-size: 1.4rem;
         font-weight: bold;
     }
 
     .alert-info {
-        background-color: #f0f8ff;
+        background-color: #f8f9fa;
         border-color: #b0c4de;
+        color: #007bff;
     }
 
     .form-label {
@@ -88,14 +101,19 @@
     }
 
     .btn-primary {
-        background-color: #3498db;
-        border-color: #2980b9;
+        background-color: #007bff;
+        border-color: #0056b3;
     }
 
     .btn-primary:hover {
-        background-color: #2980b9;
-        border-color: #1c598a;
+        background-color: #0056b3;
+        border-color: #003f7f;
+    }
+
+    .card {
+        border: none;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(5px);
     }
 </style>
-
 {% endblock %}

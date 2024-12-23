@@ -1,24 +1,26 @@
 {% extends "layout/base.html" %}
 
 {% block content %}
-    <div class="container mt-5">
-        <h2>Lịch sử giao dịch</h2>
+<div class="container mt-5">
+    <!-- Tiêu đề -->
+    <h2 class="text-center fw-bold mb-5" style="color: #007BFF;">Lịch Sử Giao Dịch</h2>
 
-        {% if giao_dichs %}
-            <table class="table table-bordered">
-                <thead>
+    {% if giao_dichs %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped table-hover align-middle">
+                <thead class="bg-primary text-white text-center">
                     <tr>
-                        <th>STT</th>
-                        <th>Ngày bay</th>
-                        <th>Chuyến bay</th>
-                        <th>Hạng vé</th>
-                        <th>Giá vé</th>
-                        <th>Thời gian giao dịch</th>
-                        <th>Tên ghế</th>
-                        <th>Trạng thái</th>
+                        <th>#</th>
+                        <th>Ngày Bay</th>
+                        <th>Chuyến Bay</th>
+                        <th>Hạng Vé</th>
+                        <th>Giá Vé</th>
+                        <th>Thời Gian Giao Dịch</th>
+                        <th>Tên Ghế</th>
+                        <th>Trạng Thái</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody class="text-center">
                     {% for giao_dich in giao_dichs %}
                     <tr>
                         <td>{{ loop.index }}</td>
@@ -26,35 +28,93 @@
                         <td>{{ giao_dich.chuyenBay.tuyenBay.tenTuyenBay if giao_dich.chuyenBay else 'Không có chuyến bay' }}</td>
                         <td>
                             {% if giao_dich.loaiVe == 'ThuongGia' %}
-                                Thương Gia
+                                <span class="badge bg-success">Thương Gia</span>
                             {% elif giao_dich.loaiVe == 'PhoThong' %}
-                                Phổ thông
+                                <span class="badge bg-info">Phổ Thông</span>
                             {% endif %}
                         </td>
-                        <td>{{ "{:,.0f}".format(giao_dich.giaVe) }} VND</td>
+                        <td><strong class="text-success">{{ "{:,.0f}".format(giao_dich.giaVe) }} VND</strong></td>
                         <td>{{ giao_dich.thoiGianGiaoDich.strftime('%H:%M %d/%m/%Y') if giao_dich.thoiGianGiaoDich else 'N/A' }}</td>
                         <td>{{ giao_dich.tenGhe if giao_dich.tenGhe else 'Không xác định' }}</td>
-                        <td class="
+                        <td>
                             {% if giao_dich.tinhTrangVe == 'Đã đặt' %}
-                                text-success
+                                <span class="badge bg-success">Đã đặt</span>
                             {% elif giao_dich.tinhTrangVe == 'Đã hủy' %}
-                                text-danger
+                                <span class="badge bg-danger">Đã hủy</span>
                             {% elif giao_dich.tinhTrangVe == 'Đã sử dụng' %}
-                                text-warning
+                                <span class="badge bg-warning text-dark">Đã sử dụng</span>
                             {% else %}
-                                text-secondary
+                                <span class="badge bg-secondary">Không xác định</span>
                             {% endif %}
-                        ">
-                            {{ giao_dich.tinhTrangVe }}
                         </td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
-        {% else %}
-            <div class="alert alert-info">
-                Bạn chưa có giao dịch nào.
-            </div>
-        {% endif %}
-    </div>
+        </div>
+    {% else %}
+        <!-- Thông báo không có giao dịch -->
+        <div class="alert alert-info text-center">
+            <strong>Thông báo:</strong> Bạn chưa có giao dịch nào.
+        </div>
+    {% endif %}
+</div>
+
+<!-- CSS cải tiến -->
+<style>
+    /* Nền */
+    body {
+        background: linear-gradient(to bottom, #f9f9f9, #e3edf7);
+        font-family: 'Poppins', sans-serif;
+    }
+
+    /* Tiêu đề */
+    h2 {
+        font-size: 2rem;
+        letter-spacing: 1px;
+    }
+
+    /* Bảng */
+    .table {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .table th {
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+    }
+
+    .table tbody tr:hover {
+        background: #f2f8ff;
+        transition: all 0.3s ease;
+    }
+
+    .table td {
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    /* Badge */
+    .badge {
+        padding: 0.5em 0.8em;
+        font-size: 0.9rem;
+        border-radius: 15px;
+        text-transform: capitalize;
+    }
+
+    /* Thông báo */
+    .alert {
+        margin-top: 30px;
+        padding: 20px;
+        border-radius: 10px;
+    }
+
+    .alert-info {
+        background: #e3f2fd;
+        color: #0d6efd;
+        border: 1px solid #90caf9;
+    }
+</style>
 {% endblock %}

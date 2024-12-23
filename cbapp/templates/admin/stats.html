@@ -1,39 +1,75 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
-<h1 class="text-center text-danger mt-1">THỐNG KÊ BÁO CÁO</h1>
+<div class="container mt-4">
+    <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Báo Cáo</h1>
 
-<div class="row">
-    <div class="col-md-7 col-12"></div>
-    <div class="col-md-5 col-12">
-        <canvas id="myChart"></canvas>
+    <div class="row">
+        <!-- Thống Kê Tổng Quan -->
+        <div class="col-md-7 col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success fw-bold">Thống Kê Tổng Quan</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <span class="fw-bold text-danger">Nhân Viên:</span> {{ nhanVien }}
+                        </li>
+                        <li class="list-group-item">
+                            <span class="fw-bold text-primary">Khách Hàng:</span> {{ khachHang }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu Đồ -->
+        <div class="col-md-5 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
+                    <canvas id="myChart"></canvas>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
+<!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
     window.onload = function() {
-          const ctx = document.getElementById('myChart');
+        const ctx = document.getElementById('myChart');
 
-          new Chart(ctx, {
+        new Chart(ctx, {
             type: 'bar',
             data: {
-              labels: ['NhanVien', 'KhachHang'],
-              datasets: [{
-                label: '# nguoi',
-                data: [{{ nhanVien }}, {{ khachHang }}],
-                borderWidth: 1,
-                backgroundColor: ['red', 'green', 'blue']
-              }]
+                labels: ['Nhân Viên', 'Khách Hàng'],
+                datasets: [{
+                    label: 'Số lượng',
+                    data: [{{ nhanVien }}, {{ khachHang }}],
+                    backgroundColor: ['#FF6384', '#36A2EB'],
+                    borderColor: ['#FF6384', '#36A2EB'],
+                    borderWidth: 1
+                }]
             },
             options: {
-              scales: {
-                y: {
-                  beginAtZero: true
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                        }
+                    }
                 }
-              }
             }
-          });
+        });
     }
 </script>
 {% endblock %}

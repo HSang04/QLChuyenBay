@@ -1,29 +1,42 @@
 {% extends 'admin/master.html' %}
 
 {% block body %}
+<div class="container mt-4">
+    {% if current_user.is_authenticated %}
+    <!-- Giao diện Admin Dashboard -->
+    <div class="card shadow-lg p-4">
+        <h2 class="text-primary fw-bold text-center">Admin Dashboard</h2>
+        <h4 class="text-success text-center">Chào {{ current_user.get_username() }}</h4>
+        <p class="text-muted text-center">Chào mừng bạn đến với trang quản trị hệ thống. Hãy quản lý các tính năng hệ thống một cách hiệu quả.</p>
 
-{% if current_user.is_authenticated %}
-<div class="container">
-    <h2>Admin Quản Trị Dashboard</h2>
-    <h2>Chào {{ current_user.get_username() }}</h2>
-    <p>Chào mừng bạn đến với trang quản trị hệ thống.</p>
+    </div>
+    {% else %}
+    <!-- Giao diện Đăng Nhập -->
+    <div class="d-flex justify-content-center align-items-center vh-100"
+         style="background: linear-gradient(to right, #4facfe, #00f2fe);">
+        <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px; border-radius: 15px;">
+            <h1 class="text-center text-primary fw-bold mb-4">Đăng Nhập Quản Trị</h1>
+
+            <form method="post" action="/login">
+                <!-- Tên đăng nhập -->
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="taiKhoan" placeholder="Tên đăng nhập" name="taiKhoan" required>
+                    <label for="taiKhoan">Tên đăng nhập</label>
+                </div>
+
+                <!-- Mật khẩu -->
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="matKhau" placeholder="Mật khẩu" name="matKhau" required>
+                    <label for="matKhau">Mật khẩu</label>
+                </div>
+
+                <!-- Nút Đăng Nhập -->
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">Đăng Nhập</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    {% endif %}
 </div>
-{% else %}
-<h1 class="text-center text-danger mt-1">DANG NHAP QUAN TRI</h1>
-<form method="post" action="/login">
-    <div class="form-floating mb-3 mt-3">
-        <input type="text" class="form-control" id="taiKhoan" placeholder="Tên đăng nhập" name="taiKhoan">
-        <label for="taiKhoan">Tên đăng nhập</label>
-    </div>
-
-    <div class="form-floating mt-3 mb-3">
-        <input type="password" class="form-control" id="matKhau" placeholder="Mật khẩu" name="matKhau">
-        <label for="matKhau">Mật khẩu</label>
-    </div>
-    <div class="form-floating mt-3 mb-3">
-        <button class="btn btn-info">Đăng nhập</button>
-    </div>
-</form>
-{% endif %}
-
 {% endblock %}

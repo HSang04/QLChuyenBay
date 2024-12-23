@@ -5,56 +5,107 @@
 {% block content %}
 <!-- Form Tìm Chuyến Bay -->
 <div class="container mt-5">
-    <h2 class="text-center">Tìm Chuyến Bay</h2>
+    <div class="text-center">
+        <h1 class="display-4 fw-bold" style="color: #0d6efd; background: linear-gradient(to right, #0d6efd, #17a2b8); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Tìm Chuyến Bay Nhanh Chóng</h1>
+        <p class="lead text-muted">Đặt vé máy bay dễ dàng, tiện lợi và nhanh chóng.</p>
+    </div>
 
-    <!-- Form Tìm Chuyến Bay -->
-    <form method="POST" action="/tim-chuyen-bay">
-        <div class="mb-3">
-            <label for="sanBayDi" class="form-label">Sân bay đi</label>
-            <select class="form-select" id="sanBayDi" name="sanBayDi" required>
-                <option value="" disabled selected>Chọn sân bay đi</option>
-                {% for sanBay in sanBays %}
-                <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="sanBayDen" class="form-label">Sân bay đến</label>
-            <select class="form-select" id="sanBayDen" name="sanBayDen" required>
-                <option value="" disabled selected>Chọn sân bay đến</option>
-                {% for sanBay in sanBays %}
-                <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
-                {% endfor %}
-            </select>
-        </div>
-
-        <div class="mb-3">
-            <label for="ngayDi" class="form-label">Ngày đi</label>
-            <input type="date" class="form-control" id="ngayDi" name="ngayDi" required>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Tìm Chuyến Bay</button>
-    </form>
+    <div class="card shadow-lg p-4 mt-4" style="border-left: 5px solid #0d6efd;">
+        <h2 class="text-center text-secondary mb-4">Tìm Chuyến Bay</h2>
+        <form method="POST" action="/tim-chuyen-bay">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="sanBayDi" class="form-label fw-semibold">Sân bay đi</label>
+                    <select class="form-select" id="sanBayDi" name="sanBayDi" required>
+                        <option value="" disabled selected>Chọn sân bay đi</option>
+                        {% for sanBay in sanBays %}
+                        <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="sanBayDen" class="form-label fw-semibold">Sân bay đến</label>
+                    <select class="form-select" id="sanBayDen" name="sanBayDen" required>
+                        <option value="" disabled selected>Chọn sân bay đến</option>
+                        {% for sanBay in sanBays %}
+                        <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-3">
+                <div class="col-md-6">
+                    <label for="ngayDi" class="form-label fw-semibold">Ngày đi</label>
+                    <input type="date" class="form-control" id="ngayDi" name="ngayDi" required>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-lg px-5" style="background-color: #0d6efd; color: white; border: none;">Tìm Chuyến Bay</button>
+            </div>
+        </form>
+    </div>
 </div>
 
-<!-- Chuyến Bay -->
+<!-- Danh Sách Chuyến Bay -->
 <div class="container mt-5">
-    <h3 class="text-center">Danh Sách Chuyến Bay</h3>
-    <div class="row">
+    <h3 class="text-center text-secondary">Danh Sách Chuyến Bay</h3>
+    <p class="text-center text-muted">Lựa chọn chuyến bay phù hợp với bạn.</p>
+    <div class="row g-4 mt-4">
         {% for chuyenBay in chuyenBays %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0" style="transition: transform 0.2s; border: 2px solid transparent;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ chuyenBay.maChuyenBay }}</h5>
-                    <p class="card-text">Tuyến bay: {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
-                    <p class="card-text">Giờ đi: {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</p>
-                    <p class="card-text">Giờ đến: {{ chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y") }}</p>
-                    <p class="card-text">Máy bay: {{ chuyenBay.mayBay.tenMayBay }}</p>
+                    <h5 class="card-title text-primary fw-bold">{{ chuyenBay.maChuyenBay }}</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</li>
+                        <li><strong>Giờ đi:</strong> {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</li>
+                        <li><strong>Giờ đến:</strong> {{ chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y") }}</li>
+                        <li><strong>Máy bay:</strong> {{ chuyenBay.mayBay.tenMayBay }}</li>
+                    </ul>
                 </div>
             </div>
         </div>
         {% endfor %}
+    </div>
+</div>
+
+<!-- Carousel (Hình ảnh chuyển động) -->
+<div class="container mt-5">
+    <h3 class="text-center text-secondary mb-4">Khám Phá Thế Giới Cùng Chúng Tôi</h3>
+    <div id="carouselExampleIndicators" class="carousel slide shadow-lg" data-bs-ride="carousel">
+        <div class="carousel-indicators">
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0" class="active" aria-current="true" aria-label="Slide 1"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1" aria-label="Slide 2"></button>
+            <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2" aria-label="Slide 3"></button>
+        </div>
+        <div class="carousel-inner" style="max-height: 500px;">
+            <div class="carousel-item active">
+                <img src="/static/images/airplane1.jpg" class="d-block w-100" alt="Hình ảnh máy bay 1" style="max-height: 500px; object-fit: cover; border-radius: 15px;">
+                <div class="carousel-caption d-none d-md-block" style="background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
+                    <h5 class="text-light">Chuyến Bay Đẳng Cấp</h5>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="/static/images/airplane2.jpg" class="d-block w-100" alt="Hình ảnh máy bay 2" style="max-height: 500px; object-fit: cover; border-radius: 15px;">
+                <div class="carousel-caption d-none d-md-block" style="background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
+                    <h5 class="text-light">Trải Nghiệm Tuyệt Vời</h5>
+                </div>
+            </div>
+            <div class="carousel-item">
+                <img src="/static/images/word.jpg" class="d-block w-100" alt="Hình ảnh máy bay 3" style="max-height: 500px; object-fit: cover; border-radius: 15px;">
+                <div class="carousel-caption d-none d-md-block" style="background: rgba(0, 0, 0, 0.5); border-radius: 10px;">
+                    <h5 class="text-light">Khám Phá Vùng Đất Mới</h5>
+                </div>
+            </div>
+        </div>
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
     </div>
 </div>
 

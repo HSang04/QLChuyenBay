@@ -3,88 +3,80 @@
 {% block title %}Tìm Chuyến Bay{% endblock %}
 
 {% block content %}
-<!-- Form Tìm Chuyến Bay -->
-<div class="container mt-5">
-    <h2 class="text-center">Tìm Chuyến Bay</h2>
-
-    <!-- Form Tìm Chuyến Bay -->
-    <form method="POST" action="/tim-chuyen-bay">
-        <div class="row">
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label for="sanBayDi" class="form-label">Sân bay đi</label>
-                    <select class="form-select" id="sanBayDi" name="sanBayDi" required>
-                        {% if data==null %}
-                        <option value="" disabled selected>Chọn sân bay đi</option>
-                        {% endif %}
-                        {% for sanBay in sanBays %}
-                        {% if sanBay.maSanBay == data.get('sanBayDi', '') %}
-                        <option value="{{ sanBay.maSanBay }}" selected>{{ sanBay.tenSanBay }}</option>
-                        {% else %}
-                        <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label for="sanBayDen" class="form-label">Sân bay đến</label>
-                    <select class="form-select" id="sanBayDen" name="sanBayDen" required>
-                        {% if data==null %}
-                        <option value="" disabled selected>Chọn sân bay đến</option>
-                        {% endif %}
-                        {% for sanBay in sanBays %}
-                        {% if sanBay.maSanBay == data.get('sanBayDen', '') %}
-                        <option value="{{ sanBay.maSanBay }}" selected>{{ sanBay.tenSanBay }}</option>
-                        {% else %}
-                        <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
-                        {% endif %}
-                        {% endfor %}
-                    </select>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="mb-3">
-                    <label for="ngayDi" class="form-label">Ngày đi</label>
-                    <input type="date" class="form-control" id="ngayDi" name="ngayDi" required value="{{ data.get('ngayDi', '') }}">
-                </div>
-            </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary">Tìm Chuyến Bay</button>
-    </form>
+<!-- Hero Section -->
+<div class="bg-primary text-white text-center py-5">
+    <h1 class="display-5 fw-bold">Tìm Chuyến Bay Dễ Dàng</h1>
+    <p class="lead">Khám phá những chuyến bay tốt nhất chỉ với vài cú click.</p>
 </div>
 
-<!-- Hiển thị kết quả chuyến bay -->
+<!-- Form Tìm Chuyến Bay -->
 <div class="container mt-5">
-    <h3 class="text-center">Danh Sách Chuyến Bay</h3>
+    <div class="card shadow-lg p-4">
+        <h2 class="text-center text-primary fw-bold mb-4">Tìm Chuyến Bay</h2>
+        <form method="POST" action="/tim-chuyen-bay">
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="sanBayDi" class="form-label fw-semibold">Sân bay đi</label>
+                        <select class="form-select" id="sanBayDi" name="sanBayDi" required>
+                            <option value="" disabled selected>Chọn sân bay đi</option>
+                            {% for sanBay in sanBays %}
+                            <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="sanBayDen" class="form-label fw-semibold">Sân bay đến</label>
+                        <select class="form-select" id="sanBayDen" name="sanBayDen" required>
+                            <option value="" disabled selected>Chọn sân bay đến</option>
+                            {% for sanBay in sanBays %}
+                            <option value="{{ sanBay.maSanBay }}">{{ sanBay.tenSanBay }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label for="ngayDi" class="form-label fw-semibold">Ngày đi</label>
+                        <input type="date" class="form-control" id="ngayDi" name="ngayDi" required>
+                    </div>
+                </div>
+            </div>
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg shadow">Tìm Chuyến Bay</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Kết quả chuyến bay -->
+<div class="container mt-5">
+    <h3 class="text-center text-primary fw-bold mb-4">Danh Sách Chuyến Bay</h3>
     {% if chuyenBays %}
-    <div class="row">
+    <div class="row g-4">
         {% for chuyenBay in chuyenBays %}
-        <div class="col-md-4 mb-3">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="card shadow-lg border-0">
                 <div class="card-body">
-                    <h5 class="card-title">Chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
-                    <p class="card-text"><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</p>
-                    <p class="card-text"><strong>Giờ đi:</strong> {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</p>
-                    <p class="card-text"><strong>Giờ đến:</strong> {{ chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y") }}</p>
-                    <p class="card-text"><strong>Máy bay:</strong> {{ chuyenBay.mayBay.tenMayBay }}</p>
-                    <!-- Nút Đặt Vé -->
-                    {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('dat_ve', ma_chuyen_bay=chuyenBay.maChuyenBay) }}" class="btn btn-success">Đặt Vé</a>
-                    {% else %}
-                    <p>Vui lòng <a href="/login?next=/tim-chuyen-bay">đăng nhập</a> để đặt vé!</p>
-                    {% endif %}
+                    <h5 class="card-title text-primary fw-bold">Chuyến bay: {{ chuyenBay.maChuyenBay }}</h5>
+                    <ul class="list-unstyled">
+                        <li><strong>Tuyến bay:</strong> {{ chuyenBay.tuyenBay.tenTuyenBay }}</li>
+                        <li><strong>Giờ đi:</strong> {{ chuyenBay.gioDi.strftime("%H:%M, %d/%m/%Y") }}</li>
+                        <li><strong>Giờ đến:</strong> {{ chuyenBay.gioDen.strftime("%H:%M, %d/%m/%Y") }}</li>
+                        <li><strong>Máy bay:</strong> {{ chuyenBay.mayBay.tenMayBay }}</li>
+                    </ul>
+                    <div class="text-center mt-3">
+                        <a href="{{ url_for('dat_ve', ma_chuyen_bay=chuyenBay.maChuyenBay) }}" class="btn btn-success btn-sm shadow">Đặt Vé</a>
+                    </div>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
     {% else %}
-    <div class="alert alert-warning" role="alert">
+    <div class="alert alert-warning text-center" role="alert">
         Không có chuyến bay phù hợp với tiêu chí tìm kiếm của bạn.
     </div>
     {% endif %}

@@ -1,31 +1,39 @@
-<!-- login.html -->
 {% extends 'layout/base.html' %}
 
 {% block title %}Đăng Nhập{% endblock %}
 
 {% block content %}
-<div class="container">
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-6">
-            <h2 class="text-center">Đăng Nhập</h2>
+<div class="vh-100 d-flex justify-content-center align-items-center"
+    style="background: linear-gradient(to right, #4facfe, #00f2fe); background-size: cover; overflow: hidden;">
+    <div class="card shadow-lg p-4" style="width: 100%; max-width: 400px; border-radius: 15px; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.9);">
+        <h2 class="text-center text-primary fw-bold mb-4">Đăng Nhập</h2>
 
-            {% if err_msg %}
-                <div class="alert alert-danger">
-                    {{ err_msg }}
-                </div>
-            {% endif %}
+        {% if err_msg %}
+            <div class="alert alert-danger text-center">
+                {{ err_msg }}
+            </div>
+        {% endif %}
 
-            <form method="POST">
-                <div class="form-group">
-                    <label for="taiKhoan">Tài Khoản</label>
-                    <input type="text" class="form-control" id="taiKhoan" name="taiKhoan" required>
-                </div>
-                <div class="form-group">
-                    <label for="matKhau">Mật Khẩu</label>
-                    <input type="password" class="form-control" id="matKhau" name="matKhau" required>
-                </div>
-                <button type="submit" class="btn btn-primary btn-block">Đăng Nhập</button>
-            </form>
+        <form method="POST" action="/login">
+            <!-- Tài Khoản -->
+            <div class="mb-3">
+                <label for="taiKhoan" class="form-label fw-semibold">Tài Khoản</label>
+                <input type="text" class="form-control" id="taiKhoan" name="taiKhoan" placeholder="Nhập tài khoản" required>
+            </div>
+
+            <!-- Mật Khẩu -->
+            <div class="mb-3">
+                <label for="matKhau" class="form-label fw-semibold">Mật Khẩu</label>
+                <input type="password" class="form-control" id="matKhau" name="matKhau" placeholder="Nhập mật khẩu" required>
+            </div>
+
+            <!-- Nút Đăng Nhập -->
+            <button type="submit" class="btn btn-primary btn-lg w-100 shadow-sm">Đăng Nhập</button>
+        </form>
+
+        <!-- Link Đăng Ký -->
+        <div class="text-center mt-3">
+            <p class="text-muted">Chưa có tài khoản? <a href="/dangky" class="text-primary fw-bold">Đăng ký ngay</a></p>
         </div>
     </div>
 </div>
