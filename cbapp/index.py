@@ -1,6 +1,8 @@
 from datetime import timedelta
 
-from flask import Flask, render_template, request, redirect, flash, url_for, session
+import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, render_template, request, redirect, flash, url_for, session, current_app
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_wtf import FlaskForm
 
@@ -583,6 +585,13 @@ def lich_su_giao_dich():
 
     if isinstance(current_user, KhachHang):
         giao_dichs = LichSuGiaoDich.query.filter_by(maKhachHang=current_user.maKhachHang).all()
+
+        # Kiểm tra và cập nhật trạng thái vé nếu cần
+        for giao_dich in giao_dichs:
+            if giao_dich.tinhTrangVe == 'Đã đặt' and giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi < datetime.utcnow():
+                giao_dich.tinhTrangVe = 'Đã sử dụng'
+                db.session.commit()
+
     else:
         flash("Bạn không có quyền truy cập lịch sử giao dịch!", "danger")
         return redirect(url_for('index'))
@@ -607,6 +616,9 @@ def account():
         'cccd': current_user.cccd
     }
     return render_template('hoso.html', user_info=user_info)
+
+
+
 
 
 if __name__ == '__main__':
