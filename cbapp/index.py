@@ -174,6 +174,7 @@ def dat_ve(ma_chuyen_bay):
             'email': email,
             'gia_ve_thuong_gia': gia_ve_thuong_gia,
             'gia_ve_pho_thong': gia_ve_pho_thong
+
         }
 
         # Kiểm tra số lượng ghế trống
@@ -228,6 +229,7 @@ def thanh_toan():
             email = dat_ve['email']
             gia_ve_thuong_gia = dat_ve['gia_ve_thuong_gia']
             gia_ve_pho_thong = dat_ve['gia_ve_pho_thong']
+            cccd = current_user.cccd
 
             # Tính tổng giá vé
             gia_ve = gia_ve_thuong_gia if loai_ve == 'ThuongGia' else gia_ve_pho_thong
@@ -251,7 +253,8 @@ def thanh_toan():
                     tenKhachHang=ten_khach_hang,
                     soDienThoai=so_dien_thoai,
                     email=email,
-                    giaVe=gia_ve
+                    giaVe=gia_ve,
+                    cccd = cccd
                 )
                 db.session.add(ve)
                 db.session.commit()
@@ -329,6 +332,7 @@ def ban_ve(ma_chuyen_bay):
         ten_nguoi_mua = request.form['ten_nguoi_mua']
         so_dien_thoai = request.form['so_dien_thoai']
         email = request.form['email']
+        cccd = request.form['cccd']  # Lấy CCCD từ form
 
         # Kiểm tra số lượng ghế trống còn lại
         if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
@@ -379,6 +383,7 @@ def ban_ve(ma_chuyen_bay):
                 soDienThoai=so_dien_thoai,
                 email=email,
                 giaVe=gia_ve,  # Lưu giá vé vào trường giaVe của vé
+                cccd=cccd,  # Lưu CCCD vào trường cccd của vé
                 maNhanVien=ma_nhan_vien  # Lưu mã nhân viên vào vé
             )
             db.session.add(ve)
@@ -447,6 +452,7 @@ class ChangeInfoForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     so_dien_thoai = StringField('Số điện thoại', validators=[DataRequired()])
     tai_khoan = StringField('Tài khoản', validators=[DataRequired()])
+    cccd = StringField('CCCD', validators=[DataRequired()])
     submit = SubmitField('Cập nhật thông tin')
 
 @app.route('/thay-doi-thong-tin', methods=['GET', 'POST'])
@@ -454,12 +460,14 @@ class ChangeInfoForm(FlaskForm):
 def change_info():
     form = ChangeInfoForm()
 
+    # Lấy dữ liệu từ current_user nếu là khách hàng
     if request.method == 'GET':
         if isinstance(current_user, KhachHang):
             form.ho_va_ten.data = current_user.hoVaTen
             form.email.data = current_user.email
             form.so_dien_thoai.data = current_user.soDienThoai
             form.tai_khoan.data = current_user.taiKhoan
+            form.cccd.data = current_user.cccd  # Gán giá trị CCCD từ current_user
 
     # Xử lý khi form được submit
     if form.validate_on_submit():
@@ -469,8 +477,9 @@ def change_info():
                 current_user.email = form.email.data
                 current_user.soDienThoai = form.so_dien_thoai.data
                 current_user.taiKhoan = form.tai_khoan.data
+                current_user.cccd = form.cccd.data
             db.session.commit()
-            app.logger.info(f"{current_user.hoVaTen}, {current_user.email}, {current_user.soDienThoai}, {current_user.taiKhoan}")
+            app.logger.info(f"{current_user.hoVaTen}, {current_user.email}, {current_user.soDienThoai}, {current_user.taiKhoan}, {current_user.cccd}")
 
             flash('Thông tin đã được cập nhật', 'success')
         except Exception as e:
@@ -594,7 +603,8 @@ def account():
         'username': current_user.taiKhoan,
         'email': current_user.email,
         'hoVaTen': current_user.hoVaTen,
-        'soDienThoai': current_user.soDienThoai
+        'soDienThoai': current_user.soDienThoai,
+        'cccd': current_user.cccd
     }
     return render_template('hoso.html', user_info=user_info)
 

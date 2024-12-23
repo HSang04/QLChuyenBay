@@ -23,10 +23,11 @@ class KhachHang(db.Model, UserMixin):
     maKhachHang = Column(Integer, primary_key=True, autoincrement=True)
     hoVaTen = Column(String(50), nullable=False)
     email = Column(String(50), unique=True, nullable=False)
-    soDienThoai = Column(String(12), nullable=False)
+    soDienThoai = Column(String(12), unique=True,nullable=False)
     active = Column(Boolean, nullable=False, default=True)
     taiKhoan = Column(String(30), unique=True, nullable=False)
     matKhau = Column(String(255), nullable=False)
+    cccd = Column(String(12), unique=True, nullable=True)
 
     def set_password(self, password):
         self.matKhau = generate_password_hash(password)
@@ -196,6 +197,7 @@ class Ve(db.Model):
     tenKhachHang = Column(String(100), nullable=True)  # Có thể bỏ trống
     soDienThoai = Column(String(15), nullable=True)  # Có thể bỏ trống
     email = Column(String(100), nullable=True)  # Có thể bỏ trống
+    cccd = Column(String(20), nullable=True)  # Thêm trường CCCD
 
 class LichSuGiaoDich(db.Model):
     __tablename__ = 'lichsugiaodich'
