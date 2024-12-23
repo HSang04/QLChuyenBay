@@ -11,7 +11,7 @@ from wtforms import Form, StringField, SelectField, form
 from wtforms.fields.choices import SelectMultipleField
 from wtforms.validators import DataRequired
 from cbapp import app, db
-from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe
+from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe, Ve, HangVe
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
 from wtforms import SelectField
@@ -54,7 +54,7 @@ class KhachHangAdmin(AdminView):
 
 
 class TuyenBayAdmin(AdminView):
-    form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen','giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
+    form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen', 'giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
     column_list = ['maTuyenBay', 'tenTuyenBay', 'maSanBayDi', 'maSanBayDen']
     column_labels = dict(maTuyenBay='Mã Tuyến Bay', tenTuyenBay='Tên Tuyến Bay', maSanBayDi='Mã Sân Bay Đi', sanBayDen='Mã Sân Bay Đến')
     can_export = True
@@ -158,8 +158,6 @@ class SanBayAdmin(AdminView):
     column_searchable_list = ['tenSanBay']
     column_filters = ['maSanBay', 'tenSanBay']
     page_size = 10
-
-
 
 
 class MayBayAdmin(AdminView):
@@ -266,6 +264,64 @@ class ChuyenBayAdmin(AdminView):
 
         return super(ChuyenBayAdmin, self).on_model_delete(model)
 
+
+class VeAdmin(AdminView):
+    column_list = ['maVe', 'tinhTrangVe', 'giaVe', 'maChuyenBay', 'maHangVe', 'maGhe', 'tenKhachHang']
+    column_labels = dict(maVe='Mã Vé', tinhTrangVe='Tình Trạng Vé', giaVe='Giá Vé', maChuyenBay='Chuyến Bay',
+                         maHangVe='Hạng Vé', maGhe='Ghế', tenKhachHang='Tên Khách Hàng')
+    column_searchable_list = ['maVe']
+    form_columns = ['tinhTrangVe', 'giaVe', 'maChuyenBay', 'maHangVe', 'maGhe', 'tenKhachHang']
+    can_export = True
+
+    column_formatters = {
+        'maChuyenBay': lambda v, c, m, p: m.chuyenBay if m.chuyenBay else '',
+        'maHangVe': lambda v, c, m, p: m.hangVe.tenHangVe if m.hangVe else '',
+        'maGhe': lambda v, c, m, p: m.ghe.tenGhe if m.ghe else '',
+        'tenKhachHang': lambda v, c, m, p: m.tenKhachHang if m.tenKhachHang else '',
+    }
+
+    form_overrides = {
+        'tinhTrangVe': SelectField,
+        # 'giaVe': SelectField,
+        'maChuyenBay': QuerySelectField,
+        'maHangVe': QuerySelectField,
+        'maGhe': QuerySelectField,
+        'tenKhachHang': QuerySelectField
+    }
+
+    form_args = {
+        'tinhTrangVe': {
+            'choices': [
+                ('Đã Bán', 'Đã Bán'),
+                ('Đã Đặt', 'Đã Đặt')
+            ]
+        },
+        # 'giaVe': {
+        #     'choices': TuyenBay.get(TuyenBay.giaCoBan),
+        # },
+        'maChuyenBay': {
+            'query_factory': lambda: ChuyenBay.query.all(),
+            'get_label': lambda x: x.maChuyenBay,
+            'get_pk': lambda x: x.maChuyenBay
+        },
+        'maHangVe': {
+            'query_factory': lambda: HangVe.query.all(),
+            'get_label': lambda x: x.tenHangVe,
+            'get_pk': lambda x: x.maHangVe
+        },
+        'maGhe': {
+            'query_factory': lambda: Ghe.query.all(),
+            'get_label': lambda x: x.tenGhe,
+            'get_pk': lambda x: x.maGhe
+        },
+        'tenKhachHang': {
+            'query_factory': lambda: KhachHang.query.all(),
+            'get_label': lambda x: x.hoVaTen,
+            'get_pk': lambda x: x.maKhachHang
+        }
+    }
+
+
 class AuthenticatedView(BaseView):
     def is_accessible(self):
         return current_user.is_authenticated
@@ -293,5 +349,6 @@ admin.add_view(NhanVienAdmin(NhanVien, db.session, name='Nhân viên'))
 admin.add_view(KhachHangAdmin(KhachHang, db.session, name='Khách hàng'))
 admin.add_view(ChuyenBayAdmin(ChuyenBay, db.session, name='Chuyến bay'))
 admin.add_view(TuyenBayAdmin(TuyenBay, db.session, name='Tuyến bay'))
+admin.add_view(VeAdmin(Ve, db.session, name='Vé'))
 admin.add_view(StatsView(name='Thống kê'))
 admin.add_view(LogoutView(name='Đăng xuất'))

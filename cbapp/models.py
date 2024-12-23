@@ -121,6 +121,8 @@ class Ghe(db.Model):
     mayBay = db.relationship('MayBay', backref=db.backref('ghe', lazy=True))
     chuyenBay = db.relationship('ChuyenBay', backref=db.backref('ghe', lazy=True))
 
+    ves = relationship('Ve', backref='ghe', lazy=True)
+
 
 class ChuyenBay(db.Model):
     __tablename__ = 'chuyenbay'
@@ -184,6 +186,7 @@ class HangVe(db.Model):
 class Ve(db.Model):
     __tablename__ = 've'
     maVe = Column(Integer, primary_key=True, autoincrement=True)
+    ngayTaoVe = db.Column(db.DateTime, default=datetime.utcnow)
     tinhTrangVe = Column(String(50), nullable=False)
     giaVe = Column(Double, nullable=False)
     maChuyenBay = Column(Integer, ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
@@ -274,8 +277,7 @@ if __name__ == '__main__':
 
         # Thêm vào session và commit
         db.session.add_all([hangve_thuong_gia, hangve_pho_thong])
-        db.session.commit()
-
 
         db.session.commit()
+
 

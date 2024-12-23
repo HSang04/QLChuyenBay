@@ -40,6 +40,7 @@ def login_process():
             elif isinstance(user, NhanVien):
                 session['user_type'] = 2
 
+            next = request.args.get('next')
 
             if isinstance(user, NhanVien):
                 if user.vaiTro == VaiTro.BANVE:
@@ -47,7 +48,7 @@ def login_process():
                 elif user.vaiTro == VaiTro.QUANTRI:
                     return redirect('/admin')
             elif isinstance(user, KhachHang):
-                return redirect('/trangchu')
+                return redirect(next if next else '/trangchu')
         else:
             err_msg = "Sai tài khoản hoặc mật khẩu."
 
@@ -121,6 +122,12 @@ def tim_chuyen_bay():
         sanBayDi = request.form['sanBayDi']
         sanBayDen = request.form['sanBayDen']
         ngayDi = request.form['ngayDi']
+        # luu form data vao session
+        session['form_data'] = {
+            'sanBayDi': sanBayDi,
+            'sanBayDen': sanBayDen,
+            'ngayDi': ngayDi
+        }
 
         # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
         chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
@@ -129,13 +136,14 @@ def tim_chuyen_bay():
             ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d')
         ).all()
 
-    return render_template('timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays)
+    form_data = session.get('form_data', {})
+    return render_template('timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays, data=form_data)
 
 @app.route('/dat_ve/<int:ma_chuyen_bay>', methods=['GET', 'POST'])
 def dat_ve(ma_chuyen_bay):
     if not current_user.is_authenticated:
         flash('Vui lòng đăng nhập trước khi đặt vé.', 'warning')
-        return redirect(url_for('login'))
+        return redirect(url_for('login_process'))
 
     chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
 
