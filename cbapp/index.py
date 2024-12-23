@@ -137,12 +137,13 @@ def dat_ve(ma_chuyen_bay):
         flash('Vui lòng đăng nhập trước khi đặt vé.', 'warning')
         return redirect(url_for('login'))
 
-    # Lấy thông tin chuyến bay
     chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
 
-    # Kiểm tra số ghế còn lại
-    soGheThuongGiaConLai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='ThuongGia', trangThai=False).count()
-    soGhePhoThongConLai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='PhoThong', trangThai=False).count()
+    gheThuongGia = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='ThuongGia').all()
+    ghePhoThong = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe='PhoThong').all()
+
+    soGheThuongGiaConLai = len([ghe for ghe in gheThuongGia if ghe.trangThai == False])
+    soGhePhoThongConLai = len([ghe for ghe in ghePhoThong if ghe.trangThai == False])
 
     # Tính giá vé
     gia_ve_thuong_gia = chuyenBay.tinh_gia_ve('ThuongGia', datetime.now().strftime("%d/%m/%Y %H:%M"))
@@ -198,7 +199,9 @@ def dat_ve(ma_chuyen_bay):
     return render_template('datve.html', chuyenBay=chuyenBay,
                            gia_ve_thuong_gia=gia_ve_thuong_gia, gia_ve_pho_thong=gia_ve_pho_thong,
                            gio_di_formatted=gio_di_formatted, gio_den_formatted=gio_den_formatted,
-                           ten_khach_hang=ten_khach_hang, so_dien_thoai=so_dien_thoai, email=email)
+                           ten_khach_hang=ten_khach_hang, so_dien_thoai=so_dien_thoai, email=email,
+                           soGheThuongGiaConLai=soGheThuongGiaConLai,
+                           soGhePhoThongConLai=soGhePhoThongConLai )
 
 @app.route('/thanh_toan', methods=['GET', 'POST'])
 def thanh_toan():
