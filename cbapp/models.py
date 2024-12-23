@@ -132,8 +132,11 @@ class ChuyenBay(db.Model):
     maTuyenBay = Column(Integer, ForeignKey('tuyenbay.maTuyenBay'), nullable=False)
     maMayBay = Column(Integer, ForeignKey('maybay.maMayBay'), nullable=False)
 
-    tuyenBay = db.relationship('TuyenBay',foreign_keys=[maTuyenBay], backref='tentb', lazy='select')
-    mayBay = db.relationship('MayBay',foreign_keys=[maMayBay], backref='tenmb', lazy='select')
+    # Thêm trường thoiGianBay tính bằng phút
+    thoiGianBay = Column(Integer, nullable=False)
+
+    tuyenBay = db.relationship('TuyenBay', foreign_keys=[maTuyenBay], backref='tentb', lazy='select')
+    mayBay = db.relationship('MayBay', foreign_keys=[maMayBay], backref='tenmb', lazy='select')
 
     ves = relationship('Ve', backref='chuyenBay', cascade="all, delete-orphan")
 
@@ -172,6 +175,8 @@ class ChuyenBay(db.Model):
         return gia_ve
 
 
+    def tinh_gio_den(self):
+        return self.gioDi + timedelta(minutes=self.thoiGianBay)
 
 
 class HangVe(db.Model):
