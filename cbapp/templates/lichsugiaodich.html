@@ -14,7 +14,7 @@
                         <th>Hạng vé</th>
                         <th>Giá vé</th>
                         <th>Thời gian giao dịch</th>
-                        <th>Tên ghế</th> <!-- Thêm cột Tên ghế -->
+                        <th>Tên ghế</th>
                         <th>Trạng thái</th>
                     </tr>
                 </thead>
@@ -22,13 +22,8 @@
                     {% for giao_dich in giao_dichs %}
                     <tr>
                         <td>{{ loop.index }}</td>
-
-                        <!-- Ngày bay (Giờ trước, ngày sau) -->
                         <td>{{ giao_dich.chuyenBay.gioDi.strftime('%H:%M %d/%m/%Y') if giao_dich.chuyenBay.gioDi else 'N/A' }}</td>
-
-                        <!-- Thông tin chuyến bay -->
                         <td>{{ giao_dich.chuyenBay.tuyenBay.tenTuyenBay if giao_dich.chuyenBay else 'Không có chuyến bay' }}</td>
-
                         <td>
                             {% if giao_dich.loaiVe == 'ThuongGia' %}
                                 Thương Gia
@@ -36,18 +31,22 @@
                                 Phổ thông
                             {% endif %}
                         </td>
-
-                        <!-- Giá vé -->
                         <td>{{ "{:,.0f}".format(giao_dich.giaVe) }} VND</td>
-
-                        <!-- Thời gian giao dịch (Giờ trước, ngày sau) -->
                         <td>{{ giao_dich.thoiGianGiaoDich.strftime('%H:%M %d/%m/%Y') if giao_dich.thoiGianGiaoDich else 'N/A' }}</td>
-
-                        <!-- Tên ghế -->
                         <td>{{ giao_dich.tenGhe if giao_dich.tenGhe else 'Không xác định' }}</td>
-
-                        <!-- Trạng thái vé -->
-                        <td>{{ giao_dich.tinhTrangVe }}</td>
+                        <td class="
+                            {% if giao_dich.tinhTrangVe == 'Đã đặt' %}
+                                text-success
+                            {% elif giao_dich.tinhTrangVe == 'Đã hủy' %}
+                                text-danger
+                            {% elif giao_dich.tinhTrangVe == 'Đã sử dụng' %}
+                                text-warning
+                            {% else %}
+                                text-secondary
+                            {% endif %}
+                        ">
+                            {{ giao_dich.tinhTrangVe }}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

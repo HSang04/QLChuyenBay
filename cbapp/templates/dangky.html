@@ -1,10 +1,54 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'layout/base.html' %}
 
-</body>
-</html>
+{% block title %}Đăng Ký{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2>Đăng ký tài khoản</h2>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <div>
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }} mt-3">{{ message }}</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+    {% endwith %}
+    <form method="post" action="{{ url_for('dang_ky') }}">
+        <div class="mb-3">
+            <label for="hoVaTen" class="form-label">Họ và tên</label>
+            <input type="text" class="form-control" id="hoVaTen" name="hoVaTen"
+                   value="{{ form_data.get('hoVaTen', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ form_data.get('email', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="soDienThoai" class="form-label">Số điện thoại</label>
+            <input type="text" class="form-control" id="soDienThoai" name="soDienThoai"
+                   value="{{ form_data.get('soDienThoai', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="cccd" class="form-label">CCCD</label>
+            <input type="text" class="form-control" id="cccd" name="cccd"
+                   value="{{ form_data.get('cccd', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="taiKhoan" class="form-label">Tài khoản</label>
+            <input type="text" class="form-control" id="taiKhoan" name="taiKhoan"
+                   value="{{ form_data.get('taiKhoan', '') }}" required>
+        </div>
+        <div class="mb-3">
+            <label for="matKhau" class="form-label">Mật khẩu</label>
+            <input type="password" class="form-control" id="matKhau" name="matKhau" required>
+        </div>
+        <div class="mb-3">
+            <label for="xacNhanMatKhau" class="form-label">Xác nhận mật khẩu</label>
+            <input type="password" class="form-control" id="xacNhanMatKhau" name="xacNhanMatKhau" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Đăng ký</button>
+    </form>
+</div>
+{% endblock %}

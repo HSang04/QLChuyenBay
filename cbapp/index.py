@@ -1,6 +1,8 @@
 from datetime import timedelta
 
-from flask import Flask, render_template, request, redirect, flash, url_for, session
+import pytz
+from apscheduler.schedulers.background import BackgroundScheduler
+from flask import Flask, render_template, request, redirect, flash, url_for, session, current_app
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
 from flask_wtf import FlaskForm
 
@@ -60,6 +62,76 @@ def logout():
     session.pop('user_type', None)
     flash('Bạn đã đăng xuất thành công!', 'success')
     return redirect('/login')
+
+@app.route('/dangky', methods=['GET', 'POST'])
+def dang_ky():
+    form_data = {}
+    if request.method == 'POST':
+        # Lấy dữ liệu từ form đăng ký
+        form_data['hoVaTen'] = request.form.get('hoVaTen')
+        form_data['email'] = request.form.get('email')
+        form_data['soDienThoai'] = request.form.get('soDienThoai')
+        form_data['taiKhoan'] = request.form.get('taiKhoan')
+        form_data['cccd'] = request.form.get('cccd')
+        matKhau = request.form.get('matKhau')
+        xacNhanMatKhau = request.form.get('xacNhanMatKhau')
+
+        # Kiểm tra mật khẩu và xác nhận mật khẩu
+        if matKhau != xacNhanMatKhau:
+            flash("Mật khẩu và xác nhận mật khẩu không trùng khớp. Vui lòng nhập lại.", "danger")
+            form_data.pop('matKhau', None)
+            form_data.pop('xacNhanMatKhau', None)
+            return render_template('dangky.html', form_data=form_data)
+
+        # Kiểm tra tài khoản, email, số điện thoại và CCCD đã tồn tại chưa
+        khach_hang_ton_tai = KhachHang.query.filter(
+            (KhachHang.taiKhoan == form_data['taiKhoan']) |
+            (KhachHang.email == form_data['email']) |
+            (KhachHang.soDienThoai == form_data['soDienThoai']) |
+            (KhachHang.cccd == form_data['cccd'])
+        ).first()
+
+        if khach_hang_ton_tai:
+            if KhachHang.query.filter_by(taiKhoan=form_data['taiKhoan']).first():
+                flash("Tài khoản đã tồn tại. Vui lòng nhập tài khoản khác.", "danger")
+                form_data.pop('taiKhoan', None)
+
+            if KhachHang.query.filter_by(email=form_data['email']).first():
+                flash("Email đã tồn tại. Vui lòng nhập email khác.", "danger")
+                form_data.pop('email', None)
+
+            if KhachHang.query.filter_by(soDienThoai=form_data['soDienThoai']).first():
+                flash("Số điện thoại đã tồn tại. Vui lòng nhập số khác.", "danger")
+                form_data.pop('soDienThoai', None)
+
+            if KhachHang.query.filter_by(cccd=form_data['cccd']).first():
+                flash("CCCD đã tồn tại. Vui lòng nhập CCCD khác.", "danger")
+                form_data.pop('cccd', None)
+
+            return render_template('dangky.html', form_data=form_data)
+
+        # Tạo đối tượng khách hàng mới
+        khach_hang_moi = KhachHang(
+            hoVaTen=form_data['hoVaTen'],
+            email=form_data['email'],
+            soDienThoai=form_data['soDienThoai'],
+            taiKhoan=form_data['taiKhoan'],
+            cccd=form_data['cccd'],
+            active=True
+        )
+        khach_hang_moi.set_password(matKhau)  # Mã hóa mật khẩu
+
+        # Lưu vào cơ sở dữ liệu
+        try:
+            db.session.add(khach_hang_moi)
+            db.session.commit()
+            flash("Đăng ký thành công! Vui lòng đăng nhập.", "success")
+            return redirect(url_for('login_process'))
+        except Exception as e:
+            db.session.rollback()
+            flash("Có lỗi xảy ra. Vui lòng thử lại.", "danger")
+
+    return render_template('dangky.html', form_data=form_data)
 
 
 @login.user_loader
@@ -182,6 +254,7 @@ def dat_ve(ma_chuyen_bay):
             'email': email,
             'gia_ve_thuong_gia': gia_ve_thuong_gia,
             'gia_ve_pho_thong': gia_ve_pho_thong
+
         }
 
         # Kiểm tra số lượng ghế trống
@@ -236,6 +309,7 @@ def thanh_toan():
             email = dat_ve['email']
             gia_ve_thuong_gia = dat_ve['gia_ve_thuong_gia']
             gia_ve_pho_thong = dat_ve['gia_ve_pho_thong']
+            cccd = current_user.cccd
 
             # Tính tổng giá vé
             gia_ve = gia_ve_thuong_gia if loai_ve == 'ThuongGia' else gia_ve_pho_thong
@@ -259,7 +333,8 @@ def thanh_toan():
                     tenKhachHang=ten_khach_hang,
                     soDienThoai=so_dien_thoai,
                     email=email,
-                    giaVe=gia_ve
+                    giaVe=gia_ve,
+                    cccd = cccd
                 )
                 db.session.add(ve)
                 db.session.commit()
@@ -337,6 +412,7 @@ def ban_ve(ma_chuyen_bay):
         ten_nguoi_mua = request.form['ten_nguoi_mua']
         so_dien_thoai = request.form['so_dien_thoai']
         email = request.form['email']
+        cccd = request.form['cccd']  # Lấy CCCD từ form
 
         # Kiểm tra số lượng ghế trống còn lại
         if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
@@ -387,6 +463,7 @@ def ban_ve(ma_chuyen_bay):
                 soDienThoai=so_dien_thoai,
                 email=email,
                 giaVe=gia_ve,  # Lưu giá vé vào trường giaVe của vé
+                cccd=cccd,  # Lưu CCCD vào trường cccd của vé
                 maNhanVien=ma_nhan_vien  # Lưu mã nhân viên vào vé
             )
             db.session.add(ve)
@@ -455,6 +532,7 @@ class ChangeInfoForm(FlaskForm):
     email = StringField('Email', validators=[DataRequired(), Email()])
     so_dien_thoai = StringField('Số điện thoại', validators=[DataRequired()])
     tai_khoan = StringField('Tài khoản', validators=[DataRequired()])
+    cccd = StringField('CCCD', validators=[DataRequired()])
     submit = SubmitField('Cập nhật thông tin')
 
 @app.route('/thay-doi-thong-tin', methods=['GET', 'POST'])
@@ -462,12 +540,14 @@ class ChangeInfoForm(FlaskForm):
 def change_info():
     form = ChangeInfoForm()
 
+    # Lấy dữ liệu từ current_user nếu là khách hàng
     if request.method == 'GET':
         if isinstance(current_user, KhachHang):
             form.ho_va_ten.data = current_user.hoVaTen
             form.email.data = current_user.email
             form.so_dien_thoai.data = current_user.soDienThoai
             form.tai_khoan.data = current_user.taiKhoan
+            form.cccd.data = current_user.cccd  # Gán giá trị CCCD từ current_user
 
     # Xử lý khi form được submit
     if form.validate_on_submit():
@@ -477,8 +557,9 @@ def change_info():
                 current_user.email = form.email.data
                 current_user.soDienThoai = form.so_dien_thoai.data
                 current_user.taiKhoan = form.tai_khoan.data
+                current_user.cccd = form.cccd.data
             db.session.commit()
-            app.logger.info(f"{current_user.hoVaTen}, {current_user.email}, {current_user.soDienThoai}, {current_user.taiKhoan}")
+            app.logger.info(f"{current_user.hoVaTen}, {current_user.email}, {current_user.soDienThoai}, {current_user.taiKhoan}, {current_user.cccd}")
 
             flash('Thông tin đã được cập nhật', 'success')
         except Exception as e:
@@ -582,6 +663,13 @@ def lich_su_giao_dich():
 
     if isinstance(current_user, KhachHang):
         giao_dichs = LichSuGiaoDich.query.filter_by(maKhachHang=current_user.maKhachHang).all()
+
+        # Kiểm tra và cập nhật trạng thái vé nếu cần
+        for giao_dich in giao_dichs:
+            if giao_dich.tinhTrangVe == 'Đã đặt' and giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi < datetime.utcnow():
+                giao_dich.tinhTrangVe = 'Đã sử dụng'
+                db.session.commit()
+
     else:
         flash("Bạn không có quyền truy cập lịch sử giao dịch!", "danger")
         return redirect(url_for('index'))
@@ -602,9 +690,13 @@ def account():
         'username': current_user.taiKhoan,
         'email': current_user.email,
         'hoVaTen': current_user.hoVaTen,
-        'soDienThoai': current_user.soDienThoai
+        'soDienThoai': current_user.soDienThoai,
+        'cccd': current_user.cccd
     }
     return render_template('hoso.html', user_info=user_info)
+
+
+
 
 
 if __name__ == '__main__':
