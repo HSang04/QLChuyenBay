@@ -11,6 +11,7 @@ from cbapp.models import KhachHang, NhanVien, Ve, LichSuGiaoDich
 
 from wtforms.fields.simple import StringField, EmailField, PasswordField, SubmitField
 from wtforms.validators import InputRequired, Email, Length, EqualTo, DataRequired
+from sqlalchemy import asc
 
 
 @app.route('/')
@@ -185,28 +186,32 @@ def trangchu():
 
     return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays)
 
+
 @app.route('/tim-chuyen-bay', methods=['GET', 'POST'])
 def tim_chuyen_bay():
-    sanBays = SanBay.query.all()  # Lấy danh sách tất cả sân bay
-    chuyenBays = []  # Khởi tạo danh sách chuyến bay
+    sanBays = SanBay.query.all()
+    chuyenBays = []
 
     if request.method == 'POST':
         sanBayDi = request.form['sanBayDi']
         sanBayDen = request.form['sanBayDen']
         ngayDi = request.form['ngayDi']
-        # luu form data vao session
+
+
         session['form_data'] = {
             'sanBayDi': sanBayDi,
             'sanBayDen': sanBayDen,
             'ngayDi': ngayDi
         }
 
-        # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
+
+        current_time = datetime.now()
+        min_time = current_time + timedelta(hours=12)
         chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
             TuyenBay.maSanBayDi == sanBayDi,
             TuyenBay.maSanBayDen == sanBayDen,
-            ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d')
-        ).all()
+            ChuyenBay.gioDi >= min_time
+        ).order_by(asc(ChuyenBay.gioDi)).all()
 
     form_data = session.get('form_data', {})
     return render_template('timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays, data=form_data)
@@ -366,25 +371,33 @@ def thanh_toan():
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
 
+from datetime import datetime, timedelta
+from flask import redirect, render_template, request
+from flask_login import login_required, current_user
+
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
 def tim_chuyen_bay_ban_ve():
-    # Kiểm tra nếu người dùng là nhân viên bán vé
     if isinstance(current_user, NhanVien) and current_user.vaiTro == VaiTro.BANVE:
-        sanBays = SanBay.query.all()  # Lấy danh sách tất cả sân bay
-        chuyenBays = []  # Khởi tạo danh sách chuyến bay
+        sanBays = SanBay.query.all()
+        chuyenBays = []
 
         if request.method == 'POST':
             sanBayDi = request.form['sanBayDi']
             sanBayDen = request.form['sanBayDen']
             ngayDi = request.form['ngayDi']
 
-            # Sửa lại query để lọc qua bảng TuyenBay thay vì trực tiếp qua ChuyenBay
+
+            current_time = datetime.now()
+
+            min_time = current_time + timedelta(hours=4)
+
             chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
                 TuyenBay.maSanBayDi == sanBayDi,
                 TuyenBay.maSanBayDen == sanBayDen,
-                ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d')
-            ).all()
+                ChuyenBay.gioDi >= min_time
+
+            ).order_by(ChuyenBay.gioDi).all()
 
         return render_template('banve_timchuyenbay.html', sanBays=sanBays, chuyenBays=chuyenBays)
 

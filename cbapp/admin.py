@@ -355,8 +355,13 @@ def lay_doanh_thu_theo_thang():
     year = request.form.get('year')
     if not month or not year:
         return jsonify({'error': 'Month and year are required!'}), 400
+
+
     doanh_thu_tuyen_bay = doanh_thu_tuyen_bay_theo_thang(month, year)
-    data = [{"id": tb[0], "tenTuyenBay": tb[1], 'doanhThu': tb[2], 'soLuotBay': tb[3]} for tb in doanh_thu_tuyen_bay]
+
+    data = [{"id": tb[0], "tenTuyenBay": tb[1], 'doanhThu': round(tb[2]), 'soLuotBay': tb[3]} for tb in
+            doanh_thu_tuyen_bay]
+
     return jsonify(data)
 
 
