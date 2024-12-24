@@ -9,7 +9,7 @@ Chúng tôi là:
 - **Trần Huỳnh Sang**
 
 ### Mục tiêu
-Tạo ra phần mềm " QUẢN LÝ CHUYẾN BAY "
+Tạo ra dự án " QUẢN LÝ CHUYẾN BAY "
 
 ### Liên hệ
 - **Ngô Quốc Quân**: [Facebook](https://www.facebook.com/quan.ngoquoc.94)
