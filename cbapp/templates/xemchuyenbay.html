@@ -1,41 +1,45 @@
-{% extends 'layout/base.html' %}
+{% extends 'layoutNhanVien/base.html' %}
 
 {% block title %}Xem Chuyến Bay{% endblock %}
 
 {% block content %}
     <div class="container mt-5">
-        <h2>Thông Tin Chuyến Bay</h2>
+        <!-- Tiêu đề chính -->
+        <h2 class="text-center text-primary fw-bold mb-4">Thông Tin Chuyến Bay</h2>
 
         <!-- Thông tin chuyến bay -->
-        <div class="mb-4">
-            <h4>{{ chuyen_bay.tuyenBay.tenTuyenBay }}</h4>
-            <p><strong>Giờ Đi:</strong> {{ chuyen_bay.gioDi.strftime('%d/%m/%Y %H:%M') }}</p>
-            <p><strong>Giờ Đến:</strong> {{ chuyen_bay.gioDen.strftime('%d/%m/%Y %H:%M') }}</p>
-            <p><strong>Máy Bay:</strong> {{ chuyen_bay.mayBay.tenMayBay }}</p>
+        <div class="card shadow-sm p-4 mb-5">
+            <div class="card-body">
+                <h4 class="text-secondary fw-bold">{{ chuyen_bay.tuyenBay.tenTuyenBay }}</h4>
+                <p><strong>Giờ Đi:</strong> {{ chuyen_bay.gioDi.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p><strong>Giờ Đến:</strong> {{ chuyen_bay.gioDen.strftime('%d/%m/%Y %H:%M') }}</p>
+                <p><strong>Máy Bay:</strong> {{ chuyen_bay.mayBay.tenMayBay }}</p>
+            </div>
         </div>
 
         <!-- Danh sách ghế -->
-        <h4>Danh Sách Ghế</h4>
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Ghế</th>
-                    <th>Hạng Ghế</th>
-                    <th>Trạng Thái</th>
-                    <th>Tên Khách Hàng</th>
-                    <th>Số Điện Thoại</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in ghe_ve_info %}
+        <h4 class="mb-4 text-secondary fw-bold">Danh Sách Ghế</h4>
+        <div class="table-responsive shadow-sm">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
                     <tr>
-                        <td>{{ item.tenGhe }}</td>
+                        <th scope="col">Ghế</th>
+                        <th scope="col">Hạng Ghế</th>
+                        <th scope="col">Trạng Thái</th>
+                        <th scope="col">Tên Khách Hàng</th>
+                        <th scope="col">Số Điện Thoại</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in ghe_ve_info %}
+                    <tr>
+                        <td class="fw-semibold">{{ item.tenGhe }}</td>
                         <td>{{ item.hangGhe }}</td>
                         <td>
                             {% if item.ve %}
                                 <span class="badge bg-success">Đã Đặt</span>
                             {% else %}
-                                <span class="badge bg-warning">Còn Trống</span>
+                                <span class="badge bg-warning text-dark">Còn Trống</span>
                             {% endif %}
                         </td>
                         <td>
@@ -53,8 +57,104 @@
                             {% endif %}
                         </td>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    <!-- CSS Cải Tiến -->
+    <style>
+        /* Toàn bộ container */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f9f9f9;
+        }
+
+        .container {
+            max-width: 1100px;
+        }
+
+        /* Tiêu đề */
+        h2 {
+            font-size: 2.5rem;
+            color: #333;
+        }
+
+        /* Card thông tin chuyến bay */
+        .card {
+            border-radius: 10px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-body p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+
+        /* Bảng danh sách ghế */
+        .table {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 15px;
+        }
+
+        .table th {
+            font-size: 1rem;
+            text-transform: uppercase;
+            background: #343a40;
+            color: #fff;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f3f5;
+        }
+
+        .table td {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .fw-semibold {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        /* Badges */
+        .badge {
+            font-size: 0.9rem;
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+
+        .badge.bg-success {
+            background-color: #28a745;
+        }
+
+        .badge.bg-warning {
+            background-color: #ffc107;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .card-body p {
+                font-size: 1rem;
+            }
+
+            .table th, .table td {
+                font-size: 0.85rem;
+            }
+        }
+    </style>
 {% endblock %}
