@@ -349,13 +349,10 @@ class StatsView(AuthenticatedView):
 
 
 @app.route('/api/doanh-thu-theo-thang', methods=['get'])
-# @login_required
+@login_required
 def lay_doanh_thu_theo_thang():
-    month = request.form.get('month')
-    year = request.form.get('year')
-    if not month or not year:
-        return jsonify({'error': 'Month and year are required!'}), 400
-
+    month = request.args.get('month')
+    year = request.args.get('year')
 
     doanh_thu_tuyen_bay = doanh_thu_tuyen_bay_theo_thang(month, year)
 

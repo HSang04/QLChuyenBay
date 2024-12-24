@@ -40,6 +40,29 @@
                 <thead>
                     <tr>
                         <h4>Thống Kê Doanh Thu Tuyến Bay</h4>
+                        <form action="/" class="form" id="formChon">
+                            <label for="month">Chọn tháng:</label>
+                            <select id="month" name="month">
+                                <option value="1">Tháng 1</option>
+                                <option value="2">Tháng 2</option>
+                                <option value="3">Tháng 3</option>
+                                <option value="4">Tháng 4</option>
+                                <option value="5">Tháng 5</option>
+                                <option value="6">Tháng 6</option>
+                                <option value="7">Tháng 7</option>
+                                <option value="8">Tháng 8</option>
+                                <option value="9">Tháng 9</option>
+                                <option value="10">Tháng 10</option>
+                                <option value="11">Tháng 11</option>
+                                <option value="12">Tháng 12</option>
+                            </select>
+
+                            <label for="year">Chọn năm:</label>
+                            <select id="year" name="year">
+                                <!-- Các giá trị năm sẽ được thêm động -->
+                            </select>
+                            <button type="submit">Xác nhận</button>
+                        </form>
                     </tr>
                     <tr>
                         <th scope="col">STT</th>
@@ -49,15 +72,8 @@
                         <th scope="col">Tỉ lệ</th>
                     </tr>
                 </thead>
-                <tbody>
-                    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
-                    <tr>
-                        <th scope="row">{{ tb[0] }}</th>
-                        <td>{{ tb[1] }}</td>
-                        <td>{{ tb[2] }}</td>
-                        <td>{{ tb[3] }}</td>
-                    </tr>
-                    {% endfor %}
+                <tbody id="show-doanh-thu">
+
                 </tbody>
             </table>
         </div>
@@ -94,24 +110,122 @@
         'rgba(255, 193, 7, 0.6)',   // Amber
         'rgba(174, 213, 129, 0.6)'  // Light Lime Green
     ];
+
     let tenTuyenBays = [];
     let doanhThus = [];
     let tiLe = [];
-    let tongDoanhThu;
+    let tongDoanhThu = 0;
 
-    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
-    tongDoanhThu = tongDoanhThu + {{ tb[2] }}
-    {% endfor %}
-    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
-    tenTuyenBays.push('{{ tb[1] }}')
-    doanhThus.push({{ tb[2] }})
-    tiLe.push({{ tb[2] }} / tongDoanhThu)
-    {% endfor %}
+    // Lấy tháng, năm hiện tại
+    const currentMonth = new Date().getMonth()+1;
+    const currentYear = new Date().getFullYear();
+
+    const monthSelect = document.getElementById('month');
+    const yearSelect = document.getElementById('year');
+
+    // Thiết lập mặc định
+    monthSelect.value = currentMonth;
+
+    // Thêm các tùy chọn năm (10 năm trước và 10 năm sau hiện tại)
+    for (let year = currentYear - 10; year <= currentYear + 10; year++) {
+        const option = document.createElement('option');
+        option.value = year;
+        option.textContent = year;
+        if (year === currentYear) {
+            option.selected = true; // Mặc định chọn năm hiện tại
+        }
+        yearSelect.appendChild(option);
+    }
+
+    // Cập nhật dữ liệu doanh thu
+    async function fetchDoanhThu(month, year) {
+        try {
+            const response = await fetch(`/api/doanh-thu-theo-thang?month=${month}&year=${year}`);
+            const data = await response.json();
+
+            // Kiểm tra nếu dữ liệu không hợp lệ
+            if (!data || data.length === 0) {
+                console.error('No data received!');
+                return [];
+            }
+            console.log("Dữ liệu trả về từ API:", data); // Kiểm tra dữ liệu
+            return data;
+        } catch(error) {
+            console.error('Error fetching data:', error);
+            return [];
+        }
+    }
+
+    // Xóa dữ liệu cũ trong bảng
+    function clearTable(tbodyname) {
+        document.getElementById(tbodyname).innerHTML = ''; // Xóa nội dung cũ
+    }
+
+    // Cập nhật bảng với dữ liệu mới
+    function updateTable(data, tbodyname) {
+        const tbody = document.getElementById(tbodyname);
+
+        data.forEach((item, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <th scope="row">${index + 1}</th>
+                <td>${item.tenTuyenBay}</td>
+                <td>${item.doanhThu}</td>
+                <td>${item.soLuotBay}</td>
+                <td>${item.tiLe}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Cập nhật biểu đồ với dữ liệu mới
+    function updateChart(chart, labels, data) {
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+    }
+
+    // Hàm chính để tải dữ liệu
+    async function loadDoanhThu(chart, tbodyname) {
+        const month = monthSelect.value;
+        const year = yearSelect.value;
+
+        try {
+            // Lấy dữ liệu từ API
+            const data = await fetchDoanhThu(month, year);
+
+            // Tính tổng doanh thu
+            const tongDoanhThu = data.reduce((total, item) => total + item.doanhThu, 0);
+
+            // Xóa dữ liệu cũ trong bảng
+            clearTable(tbodyname);
+
+            // Cập nhật bảng
+            const updatedData = data.map(item => ({
+                ...item,
+                tiLe: ((item.doanhThu / tongDoanhThu) * 100).toFixed(2) // Tính tỷ lệ phần trăm
+            }));
+            updateTable(updatedData, tbodyname);
+
+            // Cập nhật biểu đồ
+            const labels = data.map(item => item.tenTuyenBay);
+            const values = data.map(item => item.doanhThu);
+
+            updateChart(chart, labels, values);
+        } catch (error) {
+            console.error('Error in loadDoanhThu:', error);
+        }
+    }
+
 
     window.onload = function() {
+
+
         const ctx1 = document.getElementById('nguoiDungChart');
 
-        new Chart(ctx1, {
+        const chart1 = new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: ['Nhân Viên', 'Khách Hàng'],
@@ -144,7 +258,7 @@
 
         const ctx2 = document.getElementById('doanhThuTuyenBayChart');
 
-        new Chart(ctx2, {
+        const chart2 = new Chart(ctx2, {
             type: 'pie',
             data: {
                 labels: tenTuyenBays,
@@ -166,9 +280,16 @@
                 }
             }
         });
+
+        // Load dữ liệu mặc định theo tháng hiện tại
+        loadDoanhThu(chart2, "show-doanh-thu");
+
+        // Lắng nghe sự kiện submit
+        document.getElementById("formChon").addEventListener("submit", function (e) {
+            e.preventDefault();
+            loadDoanhThu(chart2, "show-doanh-thu");
+        });
     }
-
-
 
 </script>
 
