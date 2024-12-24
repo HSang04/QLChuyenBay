@@ -695,6 +695,7 @@ def account():
     }
     return render_template('hoso.html', user_info=user_info)
 
+
 @app.template_filter('currency_format')
 def currency_format(value):
     if isinstance(value, str):

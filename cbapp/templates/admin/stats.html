@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Báo Cáo</h1>
 
-    <div class="row">
+    <div class="row" style="mt-2">
         <!-- Thống Kê Tổng Quan -->
         <div class="col-md-7 col-12">
             <div class="card shadow-sm mb-4">
@@ -27,28 +27,99 @@
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
-                    <canvas id="myChart"></canvas>
+                    <canvas id="nguoiDungChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row" style="mt-20">
+        <!-- Thống Kê Doanh Thu Tuyến Bay Theo Tháng -->
+        <div class="col-md-7 col-12">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <h4>Thống Kê Doanh Thu Tuyến Bay</h4>
+                    </tr>
+                    <tr>
+                        <th scope="col">STT</th>
+                        <th scope="col">Tuyến bay</th>
+                        <th scope="col">Doanh thu</th>
+                        <th scope="col">Số lượt bay</th>
+                        <th scope="col">Tỉ lệ</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
+                    <tr>
+                        <th scope="row">{{ tb[0] }}</th>
+                        <td>{{ tb[1] }}</td>
+                        <td>{{ tb[2] }}</td>
+                        <td>{{ tb[3] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Biểu Đồ -->
+        <div class="col-md-5 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
+                    <canvas id="doanhThuTuyenBayChart"></canvas>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-    window.onload = function() {
-        const ctx = document.getElementById('myChart');
+    const colors1 = [
+        'rgba(255, 99, 132, 0.6)',   // Soft Red
+        'rgba(54, 162, 235, 0.6)',  // Soft Blue
+        'rgba(255, 206, 86, 0.6)',  // Soft Yellow
+    ];
+    const colors2 = [
+        'rgba(75, 192, 192, 0.6)',  // Soft Green
+        'rgba(153, 102, 255, 0.6)', // Soft Purple
+        'rgba(255, 159, 64, 0.6)',  // Soft Orange
+    ];
+        const colors3 = [
+        'rgba(199, 199, 199, 0.6)', // Gray
+        'rgba(100, 181, 246, 0.6)', // Light Sky Blue
+        'rgba(255, 193, 7, 0.6)',   // Amber
+        'rgba(174, 213, 129, 0.6)'  // Light Lime Green
+    ];
+    let tenTuyenBays = [];
+    let doanhThus = [];
+    let tiLe = [];
+    let tongDoanhThu;
 
-        new Chart(ctx, {
+    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
+    tongDoanhThu = tongDoanhThu + {{ tb[2] }}
+    {% endfor %}
+    {% for tb in doanh_thu_tuyen_bay_theo_thang %}
+    tenTuyenBays.push('{{ tb[1] }}')
+    doanhThus.push({{ tb[2] }})
+    tiLe.push({{ tb[2] }} / tongDoanhThu)
+    {% endfor %}
+
+    window.onload = function() {
+        const ctx1 = document.getElementById('nguoiDungChart');
+
+        new Chart(ctx1, {
             type: 'bar',
             data: {
                 labels: ['Nhân Viên', 'Khách Hàng'],
                 datasets: [{
                     label: 'Số lượng',
                     data: [{{ nhanVien }}, {{ khachHang }}],
-                    backgroundColor: ['#FF6384', '#36A2EB'],
-                    borderColor: ['#FF6384', '#36A2EB'],
+                    backgroundColor: colors1,
+                    borderColor: colors1,
                     borderWidth: 1
                 }]
             },
@@ -70,6 +141,35 @@
                 }
             }
         });
+
+        const ctx2 = document.getElementById('doanhThuTuyenBayChart');
+
+        new Chart(ctx2, {
+            type: 'pie',
+            data: {
+                labels: tenTuyenBays,
+                datasets: [{
+                    label: 'VND',
+                    data: doanhThus,
+                    backgroundColor: colors2,
+                    borderColor: colors2,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                }
+            }
+        });
     }
+
+
+
 </script>
+
 {% endblock %}

@@ -1,17 +1,18 @@
 from datetime import datetime, timedelta
 import logging
 # admin.py
-from flask import app, flash, redirect
+from flask import app, flash, redirect, request, jsonify
 from flask_admin import Admin, expose, BaseView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import Select2Widget, DateTimePickerWidget, DateTimeField
-from flask_login import current_user, logout_user
+from flask_login import current_user, logout_user, login_required
 from werkzeug.security import generate_password_hash
 from wtforms import Form, StringField, SelectField, form
 from wtforms.fields.choices import SelectMultipleField
 from wtforms.fields.numeric import IntegerField
 from wtforms.validators import DataRequired
 from cbapp import app, db
+from cbapp.dao import doanh_thu_tuyen_bay_theo_thang, doanh_thu_tuyen_bay
 from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe, Ve, HangVe
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
@@ -326,7 +327,7 @@ class VeAdmin(AdminView):
 
 class AuthenticatedView(BaseView):
     def is_accessible(self):
-        return current_user.is_authenticated
+        return current_user.is_authenticated and current_user.vaiTro.__eq__(VaiTro.QUANTRI)
 
 
 class LogoutView(AuthenticatedView):
@@ -342,7 +343,21 @@ class StatsView(AuthenticatedView):
         nhanVien = NhanVien.query.count()
         khackHang = KhachHang.query.count()
 
-        return self.render('admin/stats.html', nhanVien=nhanVien, khachHang=khackHang)
+        return self.render('admin/stats.html',
+                           nhanVien=nhanVien, khachHang=khackHang,
+                           doanh_thu_tuyen_bay_theo_thang=doanh_thu_tuyen_bay_theo_thang())
+
+
+@app.route('/api/doanh-thu-theo-thang', methods=['get'])
+# @login_required
+def lay_doanh_thu_theo_thang():
+    month = request.form.get('month')
+    year = request.form.get('year')
+    if not month or not year:
+        return jsonify({'error': 'Month and year are required!'}), 400
+    doanh_thu_tuyen_bay = doanh_thu_tuyen_bay_theo_thang(month, year)
+    data = [{"id": tb[0], "tenTuyenBay": tb[1], 'doanhThu': tb[2], 'soLuotBay': tb[3]} for tb in doanh_thu_tuyen_bay]
+    return jsonify(data)
 
 
 admin.add_view(SanBayAdmin(SanBay, db.session, name='Sân bay'))
