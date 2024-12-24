@@ -4,42 +4,113 @@
 
 {% block content %}
 <div class="container mt-5">
-    <h2 class="mb-4 text-center">Đổi Mật Khẩu</h2>
+    <!-- Tiêu đề -->
+    <h2 class="text-center text-primary mb-4 fw-bold">Đổi Mật Khẩu</h2>
 
     <!-- Hiển thị lỗi nếu có -->
     {% if form.errors %}
         <div class="alert alert-danger">
-            <ul>
-                {% for error in form.errors %}
-                    <li>{{ error }}</li>
+            <strong>Có lỗi xảy ra:</strong>
+            <ul class="mb-0">
+                {% for field, errors in form.errors.items() %}
+                    {% for error in errors %}
+                        <li>{{ error }}</li>
+                    {% endfor %}
                 {% endfor %}
             </ul>
         </div>
     {% endif %}
 
-    <form method="POST" action="{{ url_for('doimatkhau') }}">
-        {{ form.hidden_tag() }}
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow border-0">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('doimatkhau') }}">
+                        {{ form.hidden_tag() }}
 
-        <!-- Mật khẩu cũ -->
-        <div class="form-group">
-            <label for="mat_khau_cu">Mật khẩu cũ</label>
-            {{ form.mat_khau_cu(class="form-control", placeholder="Nhập mật khẩu cũ") }}
+                        <!-- Mật khẩu cũ -->
+                        <div class="mb-4">
+                            <label for="mat_khau_cu" class="form-label text-secondary">Mật khẩu cũ</label>
+                            {{ form.mat_khau_cu(class="form-control rounded", placeholder="Nhập mật khẩu cũ") }}
+                        </div>
+
+                        <!-- Mật khẩu mới -->
+                        <div class="mb-4">
+                            <label for="mat_khau_moi" class="form-label text-secondary">Mật khẩu mới</label>
+                            {{ form.mat_khau_moi(class="form-control rounded", placeholder="Nhập mật khẩu mới") }}
+                        </div>
+
+                        <!-- Xác nhận mật khẩu mới -->
+                        <div class="mb-4">
+                            <label for="xac_nhan_mat_khau" class="form-label text-secondary">Xác nhận mật khẩu mới</label>
+                            {{ form.xac_nhan_mat_khau(class="form-control rounded", placeholder="Xác nhận mật khẩu mới") }}
+                        </div>
+
+                        <!-- Submit Button -->
+                        <button type="submit" class="btn btn-primary w-100 py-2 fw-bold">Đổi Mật Khẩu</button>
+                    </form>
+                </div>
+            </div>
         </div>
-
-        <!-- Mật khẩu mới -->
-        <div class="form-group">
-            <label for="mat_khau_moi">Mật khẩu mới</label>
-            {{ form.mat_khau_moi(class="form-control", placeholder="Nhập mật khẩu mới") }}
-        </div>
-
-        <!-- Xác nhận mật khẩu mới -->
-        <div class="form-group">
-            <label for="xac_nhan_mat_khau">Xác nhận mật khẩu mới</label>
-            {{ form.xac_nhan_mat_khau(class="form-control", placeholder="Xác nhận mật khẩu mới") }}
-        </div>
-
-        <!-- Submit Button -->
-        <button type="submit" class="btn btn-primary btn-block mt-4">Đổi Mật Khẩu</button>
-    </form>
+    </div>
 </div>
+
+<!-- CSS tùy chỉnh -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #f9f9f9, #e6eef3);
+    }
+
+    h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        letter-spacing: 1px;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #555;
+        font-size: 1rem;
+    }
+
+    .form-control {
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 10px 15px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-control:focus {
+        border-color: #007BFF;
+        box-shadow: 0 0 6px rgba(0, 123, 255, 0.3);
+    }
+
+    .btn-primary {
+        background-color: #007BFF;
+        border: none;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+        border-radius: 8px;
+        padding: 15px 20px;
+    }
+
+    .card {
+        border-radius: 12px;
+        background-color: #fff;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+</style>
 {% endblock %}

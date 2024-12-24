@@ -1,0 +1,28 @@
+<!-- header.html -->
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="/banve">OUR AIRLINE</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+
+                <li class="nav-item"><a class="nav-link" href="/banve" data-title="Trang Chủ">Trang Chủ</a></li>
+                <li class="nav-item"><a class="nav-link" href="/banve/tim-chuyen-bay" data-title="Tìm Chuyến Bay">Tìm Chuyến Bay</a></li>
+
+                <li class="nav-item"><a class="nav-link" href="/tra-cuu-chuyen-bay" data-title="Tra Cứu Chuyến Bay">Tra Cứu Chuyến Bay</a></li>
+
+                {% if current_user.is_authenticated %}
+
+                    <li class="nav-item"><a class="nav-link" href="/logout">Đăng Xuất</a></li>
+                {% else %}
+                    <!-- Nếu chưa đăng nhập, hiển thị Đăng nhập và Đăng ký -->
+                    <li class="nav-item"><a class="nav-link" href="/login" data-title="Đăng Nhập">Đăng Nhập</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/dangky" data-title="Đăng Ký">Đăng Ký</a></li>
+                {% endif %}
+            </ul>
+        </div>
+    </div>
+</nav>

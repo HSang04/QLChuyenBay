@@ -1,39 +1,127 @@
-{% extends 'layout/base.html' %}
+{% extends 'layoutNhanVien/base.html' %}
 
 {% block title %}Tra Cứu Chuyến Bay{% endblock %}
 
 {% block content %}
     <div class="container mt-5">
-        <h2>Danh Sách Chuyến Bay</h2>
+        <!-- Tiêu đề -->
+        <h2 class="text-center text-dark fw-bold mb-4">Tra Cứu Chuyến Bay</h2>
 
         <!-- Nếu có chuyến bay -->
         {% if chuyen_bays %}
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Mã Chuyến Bay</th>
-                        <th>Tuyến Bay</th>
-                        <th>Giờ Đi</th>
-                        <th>Giờ Đến</th>
-                        <th>Thao Tác</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for chuyen_bay in chuyen_bays %}
+            <div class="table-responsive shadow-lg p-3 bg-white rounded">
+                <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-dark">
                         <tr>
-                            <td>{{ chuyen_bay.maChuyenBay }}</td>
+                            <th scope="col">Mã Chuyến Bay</th>
+                            <th scope="col">Tuyến Bay</th>
+                            <th scope="col">Giờ Đi</th>
+                            <th scope="col">Giờ Đến</th>
+                            <th scope="col" class="text-center">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for chuyen_bay in chuyen_bays %}
+                        <tr>
+                            <td class="fw-semibold">{{ chuyen_bay.maChuyenBay }}</td>
                             <td>{{ chuyen_bay.tuyenBay.tenTuyenBay }}</td>
                             <td>{{ chuyen_bay.gioDi.strftime('%d/%m/%Y %H:%M') }}</td>
                             <td>{{ chuyen_bay.gioDen.strftime('%d/%m/%Y %H:%M') }}</td>
-                            <td>
-                                <a href="{{ url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay) }}" class="btn btn-info">Xem Chuyến Bay</a>
+                            <td class="text-center">
+                                <a href="{{ url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay) }}"
+                                   class="btn btn-primary btn-sm px-3 shadow-sm">
+                                    <i class="bi bi-eye-fill"></i> Xem
+                                </a>
                             </td>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         {% else %}
-            <p>Không có chuyến bay nào để hiển thị.</p>
+            <div class="alert alert-info text-center fw-bold shadow-sm mt-4" role="alert">
+                <i class="bi bi-info-circle-fill me-2"></i> Hiện tại không có chuyến bay nào để hiển thị.
+            </div>
         {% endif %}
     </div>
+
+    <!-- CSS cải tiến -->
+    <style>
+        /* Toàn bộ container */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .container {
+            max-width: 900px;
+        }
+
+        /* Tiêu đề */
+        h2 {
+            font-size: 2rem;
+            color: #333;
+        }
+
+        /* Bảng */
+        .table {
+            margin-top: 20px;
+            background: #fff;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .table th, .table td {
+            vertical-align: middle;
+            padding: 15px;
+        }
+
+        .table th {
+            font-size: 1rem;
+            text-transform: uppercase;
+            background: #343a40;
+            color: #fff;
+        }
+
+        .table tbody tr {
+            transition: all 0.2s ease-in-out;
+        }
+
+        .table tbody tr:hover {
+            background: #f1f3f5;
+        }
+
+        .table tbody td {
+            font-size: 0.95rem;
+            color: #555;
+        }
+
+        .fw-semibold {
+            font-weight: 600;
+            color: #212529;
+        }
+
+        /* Nút */
+        .btn-primary {
+            background-color: #007bff;
+            border: none;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+
+        /* Alert thông báo */
+        .alert {
+            font-size: 1.1rem;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+            color: #0d6efd;
+        }
+    </style>
 {% endblock %}

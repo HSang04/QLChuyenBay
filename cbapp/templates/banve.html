@@ -1,26 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Bán Vé</title>
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body>
-    <div class="container">
-        <h2>Bán Vé</h2>
+{% extends 'layoutNhanVien/base.html' %}
 
-        <!-- Hiển thị lời chào với tên người bán vé -->
-        <p>Chào, {{ current_user.tenNhanVien }}! Chào mừng bạn đến với trang quản lý bán vé.</p>
+{% block title %}Bán Vé Chuyến Bay{% endblock %}
 
-        <!-- Nút chức năng bán vé (đã sửa lại liên kết) -->
-        <a href="/banve/tim-chuyen-bay" class="btn btn-primary">Chức năng Bán Vé</a>
-
-        <!-- Nút tra cứu chuyến bay -->
-        <a href="/tra-cuu-chuyen-bay" class="btn btn-secondary">Tra cứu Chuyến Bay</a>
-
-        <!-- Nút đăng xuất -->
-        <a href="/logout" class="btn btn-danger">Đăng xuất</a>
+{% block content %}
+<div class="container mt-5">
+    <!-- Tiêu đề -->
+    <div class="text-center mb-5">
+        <h1 class="fw-bold text-primary">Quản Lý Bán Vé</h1>
+        <p class="text-secondary">Nơi quản lý tất cả các giao dịch bán vé và tra cứu chuyến bay</p>
     </div>
-</body>
-</html>
+
+    <!-- Lời chào -->
+    <div class="alert alert-primary text-center shadow-sm">
+        <strong>Chào, {{ current_user.tenNhanVien }}!</strong> Chào mừng bạn đến với hệ thống quản lý bán vé.
+    </div>
+
+    <!-- Các chức năng -->
+    <div class="row justify-content-center mt-4">
+        <!-- Chức năng Bán Vé -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="/banve/tim-chuyen-bay" class="card shadow-sm border-0 text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-ticket-alt text-primary" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3">Bán Vé</h5>
+                    <p class="text-secondary">Quản lý việc đặt vé nhanh chóng và dễ dàng</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Tra cứu chuyến bay -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="/tra-cuu-chuyen-bay" class="card shadow-sm border-0 text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-search text-success" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3">Tra cứu Chuyến Bay</h5>
+                    <p class="text-secondary">Xem thông tin chuyến bay chi tiết</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Đăng xuất -->
+        <div class="col-lg-4 col-md-6 mb-4">
+            <a href="/logout" class="card shadow-sm border-0 text-decoration-none">
+                <div class="card-body text-center py-4">
+                    <i class="fas fa-sign-out-alt text-danger" style="font-size: 2.5rem;"></i>
+                    <h5 class="fw-bold text-dark mt-3">Đăng xuất</h5>
+                    <p class="text-secondary">Thoát khỏi hệ thống quản lý</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- CSS tùy chỉnh -->
+<style>
+    body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(to bottom, #f9f9f9, #e6eef3);
+        color: #333;
+    }
+
+    h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+    }
+
+    p {
+        font-size: 1rem;
+    }
+
+    .alert {
+        font-size: 1rem;
+        border-radius: 8px;
+    }
+
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border-radius: 12px;
+    }
+
+    .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-body {
+        font-size: 1rem;
+    }
+
+    i {
+        transition: color 0.3s ease;
+    }
+
+    a.text-decoration-none:hover i.text-primary {
+        color: #0056b3;
+    }
+
+    a.text-decoration-none:hover i.text-success {
+        color: #218838;
+    }
+
+    a.text-decoration-none:hover i.text-danger {
+        color: #c82333;
+    }
+</style>
+{% endblock %}
