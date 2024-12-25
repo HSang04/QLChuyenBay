@@ -172,8 +172,10 @@ def trangchu():
         (TuyenBay.maSanBayDen == sanBayDen if sanBayDen else True) &
         (ChuyenBay.gioDi >= datetime.strptime(ngayDi, '%Y-%m-%d') if ngayDi else True)
     ).all()
-
-    return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays)
+    now = datetime.now()
+    chuyenBayDeXuat = ChuyenBay.query.filter(ChuyenBay.gioDi >= now).order_by(ChuyenBay.gioDi).all()
+    return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays,
+                           chuyenBayDeXuat=chuyenBayDeXuat)
 
 
 @app.route('/tim-chuyen-bay', methods=['GET', 'POST'])
