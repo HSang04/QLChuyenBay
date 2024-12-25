@@ -4,35 +4,6 @@
 <div class="container mt-4">
     <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Báo Cáo</h1>
 
-    <div class="row" style="mt-2">
-        <!-- Thống Kê Tổng Quan -->
-        <div class="col-md-7 col-12">
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title text-success fw-bold">Thống Kê Tổng Quan</h5>
-                    <ul class="list-group list-group-flush">
-                        <li class="list-group-item">
-                            <span class="fw-bold text-danger">Nhân Viên:</span> {{ nhanVien }}
-                        </li>
-                        <li class="list-group-item">
-                            <span class="fw-bold text-primary">Khách Hàng:</span> {{ khachHang }}
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-
-        <!-- Biểu Đồ -->
-        <div class="col-md-5 col-12">
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
-                    <canvas id="nguoiDungChart"></canvas>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="row" style="mt-20">
         <!-- Thống Kê Doanh Thu Tuyến Bay Theo Tháng -->
         <div class="col-md-7 col-12">
@@ -40,9 +11,9 @@
                 <thead>
                     <tr>
                         <h4>Thống Kê Doanh Thu Tuyến Bay</h4>
-                        <form action="/" class="form" id="formChon">
-                            <label for="month">Chọn tháng:</label>
-                            <select id="month" name="month">
+                        <form action="/" class="form" id="formChonTB">
+                            <label for="monthTB">Chọn tháng:</label>
+                            <select id="monthTB" name="monthTB">
                                 <option value="1">Tháng 1</option>
                                 <option value="2">Tháng 2</option>
                                 <option value="3">Tháng 3</option>
@@ -57,8 +28,8 @@
                                 <option value="12">Tháng 12</option>
                             </select>
 
-                            <label for="year">Chọn năm:</label>
-                            <select id="year" name="year">
+                            <label for="yearTB">Chọn năm:</label>
+                            <select id="yearTB" name="yearTB">
                                 <!-- Các giá trị năm sẽ được thêm động -->
                             </select>
                             <button type="submit">Xác nhận</button>
@@ -72,18 +43,70 @@
                         <th scope="col">Tỉ lệ</th>
                     </tr>
                 </thead>
-                <tbody id="show-doanh-thu">
-
+                <tbody id="show-doanh-thu-tuyen-bay">
+                    <!--  Dữ liệu được thêm động sau khi lấy từ api  -->
                 </tbody>
             </table>
         </div>
-
         <!-- Biểu Đồ -->
         <div class="col-md-5 col-12">
             <div class="card shadow-sm">
                 <div class="card-body">
                     <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
                     <canvas id="doanhThuTuyenBayChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Thống Kê Nhân Viên Bán Theo Tháng -->
+        <div class="col-md-7 col-12">
+            <table class="table table-striped table-bordered">
+                <thead>
+                    <tr>
+                        <h4>Thống Kê Nhân Viên Bán Theo Tháng</h4>
+                        <form action="/" class="form" id="formNhanVien">
+                            <label for="monthNV">Chọn tháng:</label>
+                            <select id="monthNV" name="monthNV">
+                                <option value="1">Tháng 1</option>
+                                <option value="2">Tháng 2</option>
+                                <option value="3">Tháng 3</option>
+                                <option value="4">Tháng 4</option>
+                                <option value="5">Tháng 5</option>
+                                <option value="6">Tháng 6</option>
+                                <option value="7">Tháng 7</option>
+                                <option value="8">Tháng 8</option>
+                                <option value="9">Tháng 9</option>
+                                <option value="10">Tháng 10</option>
+                                <option value="11">Tháng 11</option>
+                                <option value="12">Tháng 12</option>
+                            </select>
+
+                            <label for="yearNV">Chọn năm:</label>
+                            <select id="yearNV" name="yearNV">
+                                <!-- Các giá trị năm sẽ được thêm động -->
+                            </select>
+                            <button type="submit">Xác nhận</button>
+                        </form>
+                    </tr>
+                    <tr>
+                        <th scope="col">STT</th>
+                        <th scope="col">Tên nhân viên</th>
+                        <th scope="col">Số vé bán</th>
+                        <th scope="col">Doanh thu</th>
+                        <th scope="col">Tỉ lệ</th>
+                    </tr>
+                </thead>
+                <tbody id="show-nhan-vien-ban">
+                    <!--  Dữ liệu được thêm động sau khi lấy từ api  -->
+                </tbody>
+            </table>
+        </div>
+        <!-- Biểu Đồ -->
+        <div class="col-md-5 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
+                    <canvas id="nhanVienBanChart"></canvas>
                 </div>
             </div>
         </div>
@@ -111,160 +134,40 @@
         'rgba(174, 213, 129, 0.6)'  // Light Lime Green
     ];
 
+    // Doanh thu tuyến bay
+    const monthTBSelect = document.getElementById('monthTB');
+    const yearTBSelect = document.getElementById('yearTB');
+    defaultFormChoice(monthTBSelect, yearTBSelect);
+
+    const apiDoanhThuTuyenBay = `/api/doanh-thu-tuyen-bay-theo-thang`;
+    const tuyenBayTBodyId = "show-doanh-thu-tuyen-bay";
     let tenTuyenBays = [];
-    let doanhThus = [];
-    let tiLe = [];
-    let tongDoanhThu = 0;
+    let doanhThuTuyenBays = [];
+    let tiLeTuyenBays = [];
+    let tongDoanhThuTuyenBay = 0;
 
-    // Lấy tháng, năm hiện tại
-    const currentMonth = new Date().getMonth()+1;
-    const currentYear = new Date().getFullYear();
+    // Thông số nhân viên
+    const monthNVSelect = document.getElementById('monthNV');
+    const yearNVSelect = document.getElementById('yearNV');
+    defaultFormChoice(monthNVSelect, yearNVSelect);
 
-    const monthSelect = document.getElementById('month');
-    const yearSelect = document.getElementById('year');
-
-    // Thiết lập mặc định
-    monthSelect.value = currentMonth;
-
-    // Thêm các tùy chọn năm (10 năm trước và 10 năm sau hiện tại)
-    for (let year = currentYear - 10; year <= currentYear + 10; year++) {
-        const option = document.createElement('option');
-        option.value = year;
-        option.textContent = year;
-        if (year === currentYear) {
-            option.selected = true; // Mặc định chọn năm hiện tại
-        }
-        yearSelect.appendChild(option);
-    }
-
-    // Cập nhật dữ liệu doanh thu
-    async function fetchDoanhThu(month, year) {
-        try {
-            const response = await fetch(`/api/doanh-thu-theo-thang?month=${month}&year=${year}`);
-            const data = await response.json();
-
-            // Kiểm tra nếu dữ liệu không hợp lệ
-            if (!data || data.length === 0) {
-                console.error('No data received!');
-                return [];
-            }
-            console.log("Dữ liệu trả về từ API:", data); // Kiểm tra dữ liệu
-            return data;
-        } catch(error) {
-            console.error('Error fetching data:', error);
-            return [];
-        }
-    }
-
-    // Xóa dữ liệu cũ trong bảng
-    function clearTable(tbodyname) {
-        document.getElementById(tbodyname).innerHTML = ''; // Xóa nội dung cũ
-    }
-
-    // Cập nhật bảng với dữ liệu mới
-    function updateTable(data, tbodyname) {
-        const tbody = document.getElementById(tbodyname);
-
-        data.forEach((item, index) => {
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <th scope="row">${index + 1}</th>
-                <td>${item.tenTuyenBay}</td>
-                <td>${item.doanhThu}</td>
-                <td>${item.soLuotBay}</td>
-                <td>${item.tiLe}%</td>
-            `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    // Cập nhật biểu đồ với dữ liệu mới
-    function updateChart(chart, labels, data) {
-        if (chart) {
-            chart.data.labels = labels;
-            chart.data.datasets[0].data = data;
-            chart.update();
-        }
-    }
-
-    // Hàm chính để tải dữ liệu
-    async function loadDoanhThu(chart, tbodyname) {
-        const month = monthSelect.value;
-        const year = yearSelect.value;
-
-        try {
-            // Lấy dữ liệu từ API
-            const data = await fetchDoanhThu(month, year);
-
-            // Tính tổng doanh thu
-            const tongDoanhThu = data.reduce((total, item) => total + item.doanhThu, 0);
-
-            // Xóa dữ liệu cũ trong bảng
-            clearTable(tbodyname);
-
-            // Cập nhật bảng
-            const updatedData = data.map(item => ({
-                ...item,
-                tiLe: ((item.doanhThu / tongDoanhThu) * 100).toFixed(2) // Tính tỷ lệ phần trăm
-            }));
-            updateTable(updatedData, tbodyname);
-
-            // Cập nhật biểu đồ
-            const labels = data.map(item => item.tenTuyenBay);
-            const values = data.map(item => item.doanhThu);
-
-            updateChart(chart, labels, values);
-        } catch (error) {
-            console.error('Error in loadDoanhThu:', error);
-        }
-    }
-
+    const apiNhanVienBan = `/api/nhan-vien-ban-theo-thang`;
+    const nhanVienTBodyId = "show-nhan-vien-ban";
+    let tenNhanViens = [];
+    let doanhThuNhanViens = [];
+    let tiLeNhanViens = [];
+    let tongDoanhThuNhanVien = 0;
 
     window.onload = function() {
-
-
-        const ctx1 = document.getElementById('nguoiDungChart');
-
-        const chart1 = new Chart(ctx1, {
-            type: 'bar',
-            data: {
-                labels: ['Nhân Viên', 'Khách Hàng'],
-                datasets: [{
-                    label: 'Số lượng',
-                    data: [{{ nhanVien }}, {{ khachHang }}],
-                    backgroundColor: colors1,
-                    borderColor: colors1,
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                    },
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        ticks: {
-                            stepSize: 1,
-                        }
-                    }
-                }
-            }
-        });
-
-        const ctx2 = document.getElementById('doanhThuTuyenBayChart');
-
-        const chart2 = new Chart(ctx2, {
+        //Doanh Thu Tuyến Bay
+        const ctx1 = document.getElementById('doanhThuTuyenBayChart');
+        const chartDoanhThuThang = new Chart(ctx1, {
             type: 'pie',
             data: {
                 labels: tenTuyenBays,
                 datasets: [{
                     label: 'VND',
-                    data: doanhThus,
+                    data: doanhThuTuyenBays,
                     backgroundColor: colors2,
                     borderColor: colors2,
                     borderWidth: 1
@@ -282,15 +185,209 @@
         });
 
         // Load dữ liệu mặc định theo tháng hiện tại
-        loadDoanhThu(chart2, "show-doanh-thu");
+        loadDoanhThuTuyenBay(chartDoanhThuThang, apiDoanhThuTuyenBay, tuyenBayTBodyId);
 
-        // Lắng nghe sự kiện submit
-        document.getElementById("formChon").addEventListener("submit", function (e) {
+        // test
+        fetchData(apiDoanhThuTuyenBay, 12, 2024);
+        fetchData(apiNhanVienBan, 12, 2024);
+
+        // Lắng nghe sự kiện submit cho doanh thu tuyến bay
+        document.getElementById("formChonTB").addEventListener("submit", function (e) {
             e.preventDefault();
-            loadDoanhThu(chart2, "show-doanh-thu");
+            loadDoanhThuTuyenBay(chartDoanhThuThang, apiDoanhThuTuyenBay, tuyenBayTBodyId);
+        });
+
+
+        // Nhân Viên Bán
+        const ctx2 = document.getElementById('nhanVienBanChart');
+        const chartNhanVienBan = new Chart(ctx2, {
+            type: 'bar',
+            data: {
+                labels: tenNhanViens,
+                datasets: [{
+                    label: 'VND',
+                    data: doanhThuNhanViens,
+                    backgroundColor: colors3,
+                    borderColor: colors3,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                }
+            }
+        });
+
+        // Load dữ liệu mặc định theo tháng hiện tại
+        loadNhanVienBan(chartNhanVienBan, apiNhanVienBan, nhanVienTBodyId);
+
+        // Lắng nghe sự kiện submit cho nhân viên bán
+        document.getElementById("formNhanVien").addEventListener("submit", function (e) {
+            e.preventDefault();
+            loadNhanVienBan(chartNhanVienBan, apiNhanVienBan, nhanVienTBodyId);
         });
     }
 
+    // Thiết lập mặc định cho Form
+    function defaultFormChoice(monthSelect, yearSelect) {
+        // Lấy tháng, năm hiện tại
+        const currentMonth = new Date().getMonth()+1;
+        const currentYear = new Date().getFullYear();
+
+        monthSelect.value = currentMonth;
+
+        // Thêm các tùy chọn năm (10 năm trước và 10 năm sau hiện tại)
+        for (let year = currentYear - 10; year <= currentYear + 10; year++) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = year;
+            if (year === currentYear) {
+                option.selected = true; // Mặc định chọn năm hiện tại
+            }
+            yearSelect.appendChild(option);
+        }
+    }
+
+
+    // Cập nhật dữ liệu
+    async function fetchData(api, month, year) {
+        try {
+            const response = await fetch(api + `?month=${month}&year=${year}`);
+            const data = await response.json();
+
+            // Kiểm tra nếu dữ liệu không hợp lệ
+            if (!data || data.length === 0) {
+                console.error('No data received!');
+                return [];
+            }
+            console.log("Dữ liệu trả về từ API:", data); // Kiểm tra dữ liệu
+            return data;
+        } catch(error) {
+            console.error('Error fetching data:', error);
+            return [];
+        }
+    }
+
+    // Xóa dữ liệu cũ trong bảng
+    function clearTable(tbodyId) {
+        document.getElementById(tbodyId).innerHTML = ''; // Xóa nội dung cũ
+    }
+
+    // Cập nhật bảng doanh thu tuyến bay với dữ liệu mới
+    function updateTableDoanhThuTuyenBay(data, tbodyId) {
+        const tbody = document.getElementById(tbodyId);
+
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <th scope="row">${item.id}</th>
+                <td>${item.tenTuyenBay}</td>
+                <td>${item.doanhThu}</td>
+                <td>${item.soLuotBay}</td>
+                <td>${item.tiLe}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Cập nhật bảng nhân viên bán với dữ liệu mới
+    function updateTableNhanVienBan(data, tbodyId) {
+        const tbody = document.getElementById(tbodyId);
+
+        data.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <th scope="row">${item.id}</th>
+                <td>${item.tenNhanVien}</td>
+                <td>${item.soVeBan}</td>
+                <td>${item.doanhThu}</td>
+                <td>${item.tiLe}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    // Cập nhật biểu đồ với dữ liệu mới
+    function updateChart(chart, labels, data) {
+        if (chart) {
+            chart.data.labels = labels;
+            chart.data.datasets[0].data = data;
+            chart.update();
+        }
+    }
+
+    // Hàm chính để tải dữ liệu doanh thu tuyến bay
+    async function loadDoanhThuTuyenBay(chart, api, tbodyId) {
+        const month = monthTBSelect.value;
+        const year = yearTBSelect.value;
+
+        try {
+            // Lấy dữ liệu từ API
+            const data = await fetchData(api, month, year);
+
+            // Tính tổng doanh thu
+            const tongDoanhThuTuyenBay = data.reduce((total, item) => total + item.doanhThu, 0);
+
+            // Xóa dữ liệu cũ trong bảng
+            clearTable(tbodyId);
+
+            // Thêm tỉ lệ cho data
+            const updatedData = data.map(item => ({
+                ...item,
+                tiLe: ((item.doanhThu / tongDoanhThuTuyenBay) * 100).toFixed(2) // Tính tỷ lệ phần trăm
+            }));
+
+            // Cập nhật bảng
+            updateTableDoanhThuTuyenBay(updatedData, tbodyId);
+
+            // Cập nhật biểu đồ
+            const labels = data.map(item => item.tenTuyenBay);
+            const values = data.map(item => item.doanhThu);
+
+            updateChart(chart, labels, values);
+        } catch (error) {
+            console.error('Error in loadData:', error);
+        }
+    }
+
+    // Hàm chính để tải dữ liệu nhân viên bán
+    async function loadNhanVienBan(chart, api, tbodyId) {
+        const month = monthNVSelect.value;
+        const year = yearNVSelect.value;
+
+        try {
+            // Lấy dữ liệu từ API
+            const data = await fetchData(api, month, year);
+
+            // Tính tổng doanh thu
+            const tongDoanhThuNhanVien = data.reduce((total, item) => total + item.doanhThu, 0);
+
+            // Xóa dữ liệu cũ trong bảng
+            clearTable(tbodyId);
+
+            // Thêm tỉ lệ cho data
+            const updatedData = data.map(item => ({
+                ...item,
+                tiLe: ((item.doanhThu / tongDoanhThuNhanVien) * 100).toFixed(2) // Tính tỷ lệ phần trăm
+            }));
+
+            // Cập nhật bảng
+            updateTableNhanVienBan(updatedData, tbodyId);
+
+            // Cập nhật biểu đồ
+            const labels = data.map(item => item.tenNhanVien);
+            const values = data.map(item => item.doanhThu);
+
+            updateChart(chart, labels, values);
+        } catch (error) {
+            console.error('Error in loadData:', error);
+        }
+    }
 </script>
 
 {% endblock %}

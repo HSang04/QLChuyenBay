@@ -10,6 +10,38 @@
         <p class="text-muted text-center">Chào mừng bạn đến với trang quản trị hệ thống. Hãy quản lý các tính năng hệ thống một cách hiệu quả.</p>
 
     </div>
+    <div class="container mt-4">
+    <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Tổng Quan</h1>
+
+    <div class="row" style="mt-2">
+        <!-- Thống Kê Tổng Quan -->
+        <div class="col-md-7 col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success fw-bold">Thống Kê Số Người Dùng</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <span class="fw-bold text-danger">Nhân Viên:</span> {{ so_luong_user.so_nhan_vien }}
+                        </li>
+                        <li class="list-group-item">
+                            <span class="fw-bold text-primary">Khách Hàng:</span> {{ so_luong_user.so_khach_hang }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Biểu Đồ -->
+        <div class="col-md-5 col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title text-primary fw-bold">Biểu Đồ Thống Kê</h5>
+                    <canvas id="nguoiDungChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
     {% else %}
     <!-- Giao diện Đăng Nhập -->
     <div class="d-flex justify-content-center align-items-center vh-100"
@@ -39,4 +71,61 @@
     </div>
     {% endif %}
 </div>
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const colors1 = [
+        'rgba(255, 99, 132, 0.6)',   // Soft Red
+        'rgba(54, 162, 235, 0.6)',  // Soft Blue
+        'rgba(255, 206, 86, 0.6)',  // Soft Yellow
+    ];
+    const colors2 = [
+        'rgba(75, 192, 192, 0.6)',  // Soft Green
+        'rgba(153, 102, 255, 0.6)', // Soft Purple
+        'rgba(255, 159, 64, 0.6)',  // Soft Orange
+    ];
+        const colors3 = [
+        'rgba(199, 199, 199, 0.6)', // Gray
+        'rgba(100, 181, 246, 0.6)', // Light Sky Blue
+        'rgba(255, 193, 7, 0.6)',   // Amber
+        'rgba(174, 213, 129, 0.6)'  // Light Lime Green
+    ];
+
+    window.onload = function() {
+
+        const ctx1 = document.getElementById('nguoiDungChart');
+
+        const chartNguoiDung = new Chart(ctx1, {
+            type: 'bar',
+            data: {
+                labels: ['Nhân Viên', 'Khách Hàng'],
+                datasets: [{
+                    label: 'Số lượng',
+                    data: [{{ so_luong_user.so_nhan_vien }}, {{ so_luong_user.so_khach_hang }}],
+                    backgroundColor: colors1,
+                    borderColor: colors1,
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true,
+                        position: 'top',
+                    },
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            stepSize: 1,
+                        }
+                    }
+                }
+            }
+
+        });
+    }
+</script>
 {% endblock %}

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta
 import logging
 # admin.py
 from flask import app, flash, redirect, request, jsonify
-from flask_admin import Admin, expose, BaseView
+from flask_admin import Admin, expose, BaseView, AdminIndexView
 from flask_admin.contrib.sqla.fields import QuerySelectField
 from flask_admin.form import Select2Widget, DateTimePickerWidget, DateTimeField
 from flask_login import current_user, logout_user, login_required
@@ -12,13 +12,22 @@ from wtforms.fields.choices import SelectMultipleField
 from wtforms.fields.numeric import IntegerField
 from wtforms.validators import DataRequired
 from cbapp import app, db
-from cbapp.dao import doanh_thu_tuyen_bay_theo_thang, doanh_thu_tuyen_bay
+from cbapp.dao import get_doanh_thu_tuyen_bay_theo_thang, get_so_luong_user, get_so_chuyen_bay_theo_thang, \
+    get_so_ve_nhan_vien_ban_theo_thang
 from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe, Ve, HangVe
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
 from wtforms import SelectField
 
-admin = Admin(app=app, name='Quản trị chuyến bay', template_mode='bootstrap4')
+
+class QLCBAdminIndexView(AdminIndexView):
+    @expose('/')
+    def index(self):
+        return self.render('admin/index.html', so_luong_user=get_so_luong_user())
+
+
+
+admin = Admin(app=app, name='Quản trị chuyến bay', template_mode='bootstrap4', index_view=QLCBAdminIndexView())
 
 
 class AdminView(ModelView):
@@ -340,24 +349,63 @@ class LogoutView(AuthenticatedView):
 class StatsView(AuthenticatedView):
     @expose('/')
     def index(self):
-        nhanVien = NhanVien.query.count()
-        khackHang = KhachHang.query.count()
-
-        return self.render('admin/stats.html',
-                           nhanVien=nhanVien, khachHang=khackHang,
-                           doanh_thu_tuyen_bay_theo_thang=doanh_thu_tuyen_bay_theo_thang())
+        return self.render('admin/stats.html')
 
 
-@app.route('/api/doanh-thu-theo-thang', methods=['get'])
+# api cho thong ke bao cao
+@app.route('/api/doanh-thu-tuyen-bay-theo-thang', methods=['get'])
 @login_required
-def lay_doanh_thu_theo_thang():
-    month = request.args.get('month')
-    year = request.args.get('year')
+def lay_doanh_thu_tuyen_bay_theo_thang():
+    month = request.args.get('month') if request.args.get('month') else datetime.now().month
+    year = request.args.get('year') if request.args.get('year') else datetime.now().year
 
-    doanh_thu_tuyen_bay = doanh_thu_tuyen_bay_theo_thang(month, year)
+    # Lấy dữ liệu doanh thu và số chuyến bay
+    doanh_thu_tuyen_bay = get_doanh_thu_tuyen_bay_theo_thang(month, year)
+    so_chuyen_bay = get_so_chuyen_bay_theo_thang(month, year)
 
-    data = [{"id": tb[0], "tenTuyenBay": tb[1], 'doanhThu': round(tb[2]), 'soLuotBay': tb[3]} for tb in
-            doanh_thu_tuyen_bay]
+    # Chuyển so_chuyen_bay thành dictionary để dễ tra cứu
+    so_chuyen_bay_dict = {scb[0]: scb[1] for scb in so_chuyen_bay}
+
+    # Kết hợp dữ liệu doanh thu và số chuyến bay
+    data = []
+    for tb in doanh_thu_tuyen_bay:
+        ma_tuyen_bay = tb[0]
+        ten_tuyen_bay = tb[1]
+        doanh_thu = round(tb[2])
+        so_luot_bay = so_chuyen_bay_dict.get(ma_tuyen_bay, 0)  # Mặc định là 0 nếu không tìm thấy
+
+        data.append({
+            "id": ma_tuyen_bay,
+            "tenTuyenBay": ten_tuyen_bay,
+            "doanhThu": doanh_thu,
+            "soLuotBay": so_luot_bay
+        })
+
+    return jsonify(data)
+
+
+@app.route('/api/nhan-vien-ban-theo-thang', methods=['get'])
+@login_required
+def lay_thong_ke_nhan_vien_theo_thang():
+    month = request.args.get('month') if request.args.get('month') else datetime.now().month
+    year = request.args.get('year') if request.args.get('year') else datetime.now().year
+
+    # Lấy dữ liệu nhân viên bán vé
+    nhan_vien_ban_ve = get_so_ve_nhan_vien_ban_theo_thang(month, year)
+
+    data = []
+    for nv in nhan_vien_ban_ve:
+        ma_nhan_vien = nv[0]
+        ten_nhan_vien = nv[1]
+        so_ve_ban = nv[2]
+        doanh_thu = round(nv[3])
+
+        data.append({
+            "id": ma_nhan_vien,
+            "tenNhanVien": ten_nhan_vien,
+            "soVeBan": so_ve_ban,
+            "doanhThu": doanh_thu
+        })
 
     return jsonify(data)
 
