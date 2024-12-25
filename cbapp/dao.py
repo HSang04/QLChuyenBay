@@ -1,5 +1,6 @@
 from calendar import month
 
+from flask_login import current_user
 from sqlalchemy import func
 from sqlalchemy.sql.functions import count
 from cbapp.models import NhanVien, KhachHang, SanBay, TuyenBay, ChuyenBay, Ve, LichSuGiaoDich, Ghe, HangVe, VaiTro
@@ -75,7 +76,15 @@ def get_so_ve_nhan_vien_ban_theo_thang(month=datetime.now().month, year=datetime
             .group_by(NhanVien.maNhanVien)\
             .filter(func.extract('month', Ve.ngayTaoVe).__eq__(month) and func.extract('year', Ve.ngayTaoVe).__eq__(year)).all()
 
-
+def get_user_info():
+    user_info = {
+        'username': current_user.taiKhoan,
+        'email': current_user.email,
+        'hoVaTen': current_user.hoVaTen,
+        'soDienThoai': current_user.soDienThoai,
+        'cccd': current_user.cccd
+    }
+    return user_info
 if __name__ == '__main__':
     with app.app_context():
         print(get_so_ve_nhan_vien_ban_theo_thang())
