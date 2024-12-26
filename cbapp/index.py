@@ -431,7 +431,7 @@ def ban_ve(ma_chuyen_bay):
             ve = Ve(
                 tinhTrangVe='Đã bán',  maChuyenBay=chuyenBay.maChuyenBay,   maKhachHang=None,
                 maGhe=ghe_con_lai.maGhe,   maHangVe=maHangVe,  tenKhachHang=ten_nguoi_mua,
-                email=email,  giaVe=gia_ve,    cccd=cccd,      maNhanVien=ma_nhan_vien      )
+                email=email,  giaVe=gia_ve,    cccd=cccd,      maNhanVien=ma_nhan_vien , soDienThoai = so_dien_thoai    )
             db.session.add(ve)
             db.session.commit()
             ve_ids.append(ve.maVe)
@@ -542,28 +542,29 @@ def tracuu_chuyen_bay():
 @login_required
 def xem_chuyen_bay(maChuyenBay):
     chuyen_bay = ChuyenBay.query.get_or_404(maChuyenBay)
-    ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).all()
+    ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).filter(Ve.tinhTrangVe != "Đã hủy").all()
     ghe_ve_info = []
     for ghe in chuyen_bay.ghe:
 
         ve = next((v for v in ve_list if v.maGhe == ghe.maGhe), None)
-        if ve:
+
+        if ve and ghe.trangThai == 1:  # Nếu vé tồn tại và ghế đã được đặt
             khach_hang = {
                 'tenKhachHang': ve.tenKhachHang,
                 'soDienThoai': ve.soDienThoai
             }
         else:
-            khach_hang = None
-
+            khach_hang = None  # Ghế trống hoặc chưa có vé đặt
 
         ghe_ve_info.append({
             'tenGhe': ghe.tenGhe,
             'maGhe': ghe.maGhe,
             'hangGhe': ghe.hangGhe,
             've': ve,
-            'khachHang': khach_hang  # Thông tin khách hàng
+            'khachHang': khach_hang
         })
     return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
+
 
 @app.route('/hien_thi_ve', methods=['GET', 'POST'])
 def hien_thi_ve():

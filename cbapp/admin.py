@@ -307,7 +307,8 @@ class VeAdmin(AdminView):
         'tinhTrangVe': {
             'choices': [
                 ('Đã Bán', 'Đã Bán'),
-                ('Đã Đặt', 'Đã Đặt')
+                ('Đã Đặt', 'Đã Đặt'),
+
             ]
         },
         # 'giaVe': {
