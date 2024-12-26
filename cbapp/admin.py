@@ -39,7 +39,7 @@ class AdminView(ModelView):
 
 class NhanVienAdmin(AdminView):
     column_list = ['tenNhanVien', 'email', 'soDienThoai','vaiTro']
-    column_labels = dict(tenNhanVien='Tên Nhân Viên', soDienThoai='Số Điện Thoại', vaiTro='Vai Trò')
+    column_labels = dict(tenNhanVien='Tên Nhân Viên', soDienThoai='Số Điện Thoại', vaiTro='Vai Trò', taiKhoan='Tài khoản', matKhau='Mật khấu')
     column_searchable_list = ['tenNhanVien']
     form_choices = {
         'vaiTro': [(v.name, v.value) for v in VaiTro]}
@@ -55,7 +55,7 @@ class NhanVienAdmin(AdminView):
 
 class KhachHangAdmin(AdminView):
     column_list = ['hoVaTen', 'email', 'soDienThoai','active']
-    column_labels = dict(hoVaTen='Họ và Tên', soDienThoai='Số Điện Thoại')
+    column_labels = dict(hoVaTen='Họ và Tên', soDienThoai='Số Điện Thoại', taiKhoan ='Tài khoản', matKhau='Mật khẩu', cccd='Số căn cước công dân')
     column_searchable_list = ['hoVaTen']
     def on_model_change(self, form, model, is_created):
         if is_created:
@@ -69,7 +69,10 @@ class KhachHangAdmin(AdminView):
 class TuyenBayAdmin(AdminView):
     form_columns = ['tenTuyenBay', 'sanBayDi', 'sanBayDen', 'giaCoBan', 'sanBayTrungGian1', 'thoiGianDung1', 'sanBayTrungGian2', 'thoiGianDung2']
     column_list = ['maTuyenBay', 'tenTuyenBay', 'maSanBayDi', 'maSanBayDen']
-    column_labels = dict(maTuyenBay='Mã Tuyến Bay', tenTuyenBay='Tên Tuyến Bay', maSanBayDi='Mã Sân Bay Đi', sanBayDen='Mã Sân Bay Đến')
+    column_labels = dict(maTuyenBay='Mã Tuyến Bay', tenTuyenBay='Tên Tuyến Bay', sanBayDi='Sân Bay Đi', sanBayDen='Sân Bay Đến',
+                         giaCoBan ='Giá phổ thông', sanBayTrungGian1 = 'Sân bay trung gian 1', thoigianDung1='Thời gian dừng'
+                         , sanBayTrungGian2 = 'Sân bay trung gian 2', thoigianDung2='Thời gian dừng', maSanBayDi ='Mã sân bay đi'
+                         ,maSanBayDen ='Mã sân bay đến')
     can_export = True
     column_searchable_list = ['tenTuyenBay']
     column_filters = ['maTuyenBay', 'tenTuyenBay']
@@ -191,7 +194,7 @@ class MayBayAdmin(AdminView):
 
 class ChuyenBayAdmin(AdminView):
     column_list = ['maChuyenBay', 'tuyenBay', 'gioDi', 'gioDen', 'mayBay']
-    column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến', mayBay='Máy Bay')
+    column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến', mayBay='Máy Bay', thoiGianBay ='Thời gian bay ( DỰ KIẾN )')
     column_searchable_list = ['maChuyenBay']
     form_columns = ['tuyenBay', 'gioDi', 'thoiGianBay', 'mayBay']
 

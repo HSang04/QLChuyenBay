@@ -241,8 +241,8 @@ if __name__ == '__main__':
 
         haNoi = SanBay(maSanBay="HAN", tenSanBay="Sân bay Nội Bài, Hà Nội")
         saiGon = SanBay(maSanBay="SGN", tenSanBay="Sân bay Tân Sơn Nhất, TP. HCM")
-        daNang = SanBay(maSanBay="DAD", tenSanBay="Sân bay Quốc tế Đà Nẵng")
-        phuQuoc = SanBay(maSanBay="PQC", tenSanBay="Sân bay Phú Quốc")
+        daNang = SanBay(maSanBay="DAD", tenSanBay="Sân bay Quốc tế Đà Nẵng, Đà Nẵng")
+        phuQuoc = SanBay(maSanBay="PQC", tenSanBay="Sân bay Phú Quốc, Kiên Giang")
         hue = SanBay(maSanBay="HUI", tenSanBay="Sân bay Phú Bài, Huế")
         caMau = SanBay(maSanBay="CAH", tenSanBay="Sân bay Cà Mau, Cà Mau")
         canTho = SanBay(maSanBay="VCA", tenSanBay="Sân bay Cần Thơ, Cần Thơ")

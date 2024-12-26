@@ -85,7 +85,6 @@ def dang_ky():
             form_data.pop('xacNhanMatKhau', None)
             return render_template('dangky.html', form_data=form_data)
 
-
         khach_hang_ton_tai = KhachHang.query.filter(
             (KhachHang.taiKhoan == form_data['taiKhoan']) |
             (KhachHang.email == form_data['email']) |
