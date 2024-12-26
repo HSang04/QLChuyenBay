@@ -56,15 +56,19 @@ def get_so_luong_tong_quat():
 
 def get_doanh_thu_tuyen_bay():
     return db.session.query(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay, func.sum(Ve.giaVe))\
-            .join(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay)).join(Ve, ChuyenBay.maChuyenBay.__eq__(Ve.maChuyenBay))\
+            .join(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay)).join(Ve, ChuyenBay.maChuyenBay.__eq__(Ve.maChuyenBay)) \
+            .filter(Ve.tinhTrangVe != "Đã hủy") \
             .group_by(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay).all()
 
 
 def get_doanh_thu_tuyen_bay_theo_thang(month=datetime.now().month, year=datetime.now().year):
     return db.session.query(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay, func.sum(Ve.giaVe))\
-            .join(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay)).join(Ve, ChuyenBay.maChuyenBay.__eq__(Ve.maChuyenBay))\
-            .group_by(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay)\
-            .filter(func.extract('month', Ve.ngayTaoVe).__eq__(month) and func.extract('year', Ve.ngayTaoVe).__eq__(year)).all()
+            .join(ChuyenBay, TuyenBay.maTuyenBay == ChuyenBay.maTuyenBay)\
+            .join(Ve, ChuyenBay.maChuyenBay == Ve.maChuyenBay)\
+            .filter(Ve.tinhTrangVe != "Đã hủy")\
+            .filter(func.extract('month', Ve.ngayTaoVe) == month)\
+            .filter(func.extract('year', Ve.ngayTaoVe) == year)\
+            .group_by(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay).all()
 
 
 def get_so_chuyen_bay_cua_tuyen_bay():
@@ -79,27 +83,29 @@ def get_so_chuyen_bay_cua_tuyen_bay_theo_thang(month=datetime.now().month, year=
 
 def get_so_ve_nhan_vien_ban():
     return db.session.query(NhanVien.maNhanVien, NhanVien.tenNhanVien, func.count(Ve.maNhanVien), func.sum(Ve.giaVe))\
-            .join(Ve, NhanVien.maNhanVien.__eq__(Ve.maNhanVien))\
-            .group_by(NhanVien.maNhanVien).filter(NhanVien.vaiTro.__eq__(VaiTro.BANVE)).all()
-
+            .join(Ve, NhanVien.maNhanVien == Ve.maNhanVien)\
+            .filter(Ve.tinhTrangVe != "Đã hủy")\
+            .group_by(NhanVien.maNhanVien)\
+            .filter(NhanVien.vaiTro == VaiTro.BANVE).all()
 
 def get_so_ve_nhan_vien_ban_theo_thang(month=datetime.now().month, year=datetime.now().year):
     return db.session.query(NhanVien.maNhanVien, NhanVien.tenNhanVien, func.count(Ve.maNhanVien), func.sum(Ve.giaVe))\
-            .join(Ve, NhanVien.maNhanVien.__eq__(Ve.maNhanVien))\
-            .group_by(NhanVien.maNhanVien)\
-            .filter(func.extract('month', Ve.ngayTaoVe).__eq__(month) and func.extract('year', Ve.ngayTaoVe).__eq__(year)).all()
-
+            .join(Ve, NhanVien.maNhanVien == Ve.maNhanVien)\
+            .filter(Ve.tinhTrangVe != "Đã hủy")\
+            .filter(func.extract('month', Ve.ngayTaoVe) == month)\
+            .filter(func.extract('year', Ve.ngayTaoVe) == year)\
+            .group_by(NhanVien.maNhanVien).all()
 
 def get_doanh_thu():
-    return db.session.query(func.sum(Ve.giaVe)).all()
-
-
+    return db.session.query(func.sum(Ve.giaVe))\
+            .filter(Ve.tinhTrangVe != "Đã hủy")\
+            .all()
 def get_doanh_thu_theo_nam(year=datetime.now().year):
     return db.session.query(func.extract('month', Ve.ngayTaoVe), func.sum(Ve.giaVe))\
+            .filter(Ve.tinhTrangVe != "Đã hủy")\
             .group_by(func.extract('month', Ve.ngayTaoVe))\
-            .filter(func.extract('year', Ve.ngayTaoVe).__eq__(year))\
+            .filter(func.extract('year', Ve.ngayTaoVe) == year)\
             .order_by(func.extract('month', Ve.ngayTaoVe)).all()
-
 
 def get_user_info():
     user_info = {

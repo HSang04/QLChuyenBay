@@ -194,7 +194,9 @@ class ChuyenBayAdmin(AdminView):
     column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến', mayBay='Máy Bay')
     column_searchable_list = ['maChuyenBay']
     form_columns = ['tuyenBay', 'gioDi', 'thoiGianBay', 'mayBay']
+
     can_export = True
+
 
     column_formatters = {
         'tuyenBay': lambda v, c, m, p: m.tuyenBay.tenTuyenBay if m.tuyenBay else '',
@@ -286,6 +288,9 @@ class VeAdmin(AdminView):
     column_searchable_list = ['maVe']
     form_columns = ['tinhTrangVe', 'giaVe', 'maChuyenBay', 'maHangVe', 'maGhe', 'tenKhachHang']
     can_export = True
+    can_edit = False
+    can_delete = False
+    can_create = False
 
     column_formatters = {
         'maChuyenBay': lambda v, c, m, p: m.chuyenBay if m.chuyenBay else '',
