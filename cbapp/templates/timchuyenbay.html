@@ -81,4 +81,27 @@
     </div>
     {% endif %}
 </div>
+
+{% block scripts %}
+<!-- Include Select2 CSS and JS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<script>
+    $(document).ready(function() {
+        // Enable Select2 on the select fields
+        $('#sanBayDi').select2({
+            placeholder: "Chọn sân bay đi",
+            allowClear: true
+        });
+
+        $('#sanBayDen').select2({
+            placeholder: "Chọn sân bay đến",
+            allowClear: true
+        });
+    });
+</script>
+{% endblock %}
+
 {% endblock %}

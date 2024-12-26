@@ -20,8 +20,6 @@ from sqlalchemy import asc
 def index():
     return redirect('/trangchu')
 
-
-
 @app.route('/login', methods=['GET', 'POST'])
 def login_process():
     err_msg = None
@@ -658,7 +656,7 @@ def huy_ve(giao_dich_id):
                 flash("Vé đã được hủy thành công!", "success")
                 ve = Ve.query.filter_by(maChuyenBay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).filter(Ve.tinhTrangVe != 'Đã hủy').first()
                 if ve:
-                    ve.tinhTrangVe = "Đã hủy"  # Cập nhật trạng thái vé trong bảng LichSuGiaoDich
+                    ve.tinhTrangVe = "Đã hủy"
                     db.session.commit()
             else:
                 flash("Không tìm thấy ghế tương ứng với giao dịch.", "danger")

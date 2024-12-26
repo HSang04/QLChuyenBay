@@ -41,8 +41,10 @@
                             </select>
                         </div>
                     </div>
+                </div>
 
-                    <!-- Ngày Đi -->
+                <!-- Ngày Đi (Chuyển xuống hàng dưới) -->
+                <div class="row">
                     <div class="col-md-4">
                         <div class="mb-3">
                             <label for="ngayDi" class="form-label text-secondary">Ngày đi</label>
@@ -151,4 +153,24 @@
         box-shadow: 0 12px 20px rgba(0, 0, 0, 0.2);
     }
 </style>
+
+<!-- Thêm Select2 -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.0.13/dist/js/select2.min.js"></script>
+
+<script>
+    // Áp dụng Select2 cho các trường chọn sân bay
+    $(document).ready(function() {
+        $('#sanBayDi').select2({
+            placeholder: "Chọn sân bay đi",
+            allowClear: true
+        });
+        $('#sanBayDen').select2({
+            placeholder: "Chọn sân bay đến",
+            allowClear: true
+        });
+    });
+</script>
+
 {% endblock %}

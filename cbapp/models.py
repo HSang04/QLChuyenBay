@@ -244,8 +244,13 @@ if __name__ == '__main__':
         daNang = SanBay(maSanBay="DAD", tenSanBay="Sân bay Quốc tế Đà Nẵng")
         phuQuoc = SanBay(maSanBay="PQC", tenSanBay="Sân bay Phú Quốc")
         hue = SanBay(maSanBay="HUI", tenSanBay="Sân bay Phú Bài, Huế")
-        caMau = SanBay(maSanBay="CAH", tenSanBay="Sân bay Cà Mau")
-        db.session.add_all([haNoi, saiGon, daNang, phuQuoc, hue, caMau])
+        caMau = SanBay(maSanBay="CAH", tenSanBay="Sân bay Cà Mau, Cà Mau")
+        canTho = SanBay(maSanBay="VCA", tenSanBay="Sân bay Cần Thơ, Cần Thơ")
+        nhaTrang = SanBay(maSanBay="CXR", tenSanBay="Sân bay Cam Ranh, Nha Trang")
+        haiPhong = SanBay(maSanBay="HPH", tenSanBay="Sân bay Cát Bi, Hải Phòng")
+        quangNinh = SanBay(maSanBay="VDO", tenSanBay="Sân bay Vân Đồn, Quảng Ninh")
+
+        db.session.add_all([haNoi, saiGon, daNang, phuQuoc, hue, caMau, canTho, nhaTrang, haiPhong, quangNinh])
 
 
         khachHang1 = KhachHang(hoVaTen="Nguyễn Văn A", email="nguyenvana@example.com",
