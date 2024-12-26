@@ -4,7 +4,7 @@
 <div class="container mt-4">
     <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Báo Cáo</h1>
 
-    <div class="row" style="mt-20">
+    <div class="row mt-2">
         <!-- Thống Kê Doanh Thu Tuyến Bay Theo Tháng -->
         <div class="col-md-7 col-12">
             <table class="table table-striped table-bordered">
@@ -57,9 +57,10 @@
                 </div>
             </div>
         </div>
-
+    </div>
+    <div class="row mt-2">
+        <!--  Thống kê doanh thu tổng theo năm  -->
         <div class="col-md-7 col-12">
-            <!--  Thống kê doanh thu tổng theo năm  -->
             <table class="table table-striped table-bordered">
                 <thead>
                     <tr>
@@ -92,7 +93,8 @@
                 </div>
             </div>
         </div>
-
+    </div>
+    <div class="row mt-2">
         <!-- Thống Kê Nhân Viên Bán Theo Tháng -->
         <div class="col-md-7 col-12">
             <table class="table table-striped table-bordered">
@@ -145,6 +147,10 @@
                 </div>
             </div>
         </div>
+    </div>
+
+    <div class="row mt-2" style="text-align: center;">
+        <button id="print-btn" onclick="printAndHide()">Xuất thông tin</button>
     </div>
 </div>
 
@@ -518,6 +524,19 @@
             console.error('Error in loadData:', error);
         }
     }
+
+    function printAndHide() {
+            // Ẩn các nút khi nhấn "Xuất thông tin"
+            document.getElementById('print-btn').style.display = 'none';
+
+            // Gọi chức năng in
+            window.print();
+
+            // Hiện lại các nút sau khi in (tuỳ chọn)
+            setTimeout(() => {
+                document.getElementById('print-btn').style.display = 'inline-block';
+            }, 1000);
+        }
 </script>
 
 {% endblock %}

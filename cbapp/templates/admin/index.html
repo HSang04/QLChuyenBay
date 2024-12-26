@@ -8,17 +8,17 @@
         <h2 class="text-primary fw-bold text-center">Admin Dashboard</h2>
         <h4 class="text-success text-center">Chào {{ current_user.get_username() }}</h4>
         <p class="text-muted text-center">Chào mừng bạn đến với trang quản trị hệ thống. Hãy quản lý các tính năng hệ thống một cách hiệu quả.</p>
-
     </div>
-    <div class="container mt-4">
+
     <h1 class="text-center text-primary fw-bold mb-4">Thống Kê Tổng Quan</h1>
 
-    <div class="row" style="mt-2">
-        <!-- Thống Kê Tổng Quan -->
+    <!-- Thống Kê Tổng Quan -->
+    <div class="row mt-2">
+        <!--  Số người dùng  -->
         <div class="col-md-7 col-12">
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title text-success fw-bold">Thống Kê Số Người Dùng</h5>
+                    <h5 class="card-title text-success fw-bold">Số Người Dùng</h5>
                     <ul class="list-group list-group-flush">
                         <li class="list-group-item">
                             <span class="fw-bold text-danger">Nhân Viên:</span> {{ so_luong_user.so_nhan_vien }}
@@ -41,7 +41,32 @@
             </div>
         </div>
     </div>
-</div>
+
+    <div class="row mt mt-2">
+        <!-- Số lượng tổng quát QLCB -->
+        <div class="col-md-12 col-12">
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title text-success fw-bold">Số Lượng Tổng Quát</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <span class="fw-bold text-danger">Số Máy Bay:</span> {{ so_luong_tong_quat.so_may_bay }}
+                        </li>
+                        <li class="list-group-item">
+                            <span class="fw-bold text-primary">Số Tuyến Bay:</span> {{ so_luong_tong_quat.so_tuyen_bay }}
+                        </li>
+                        <li class="list-group-item">
+                            <span class="fw-bold text-primary">Số Chuyến Bay:</span> {{ so_luong_tong_quat.so_chuyen_bay }}
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mt-2" style="text-align: center;">
+        <button id="print-btn" onclick="printAndHide()">Xuất thông tin</button>
+    </div>
     {% else %}
     <!-- Giao diện Đăng Nhập -->
     <div class="d-flex justify-content-center align-items-center vh-100"
@@ -71,6 +96,7 @@
     </div>
     {% endif %}
 </div>
+
 <!-- Chart.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
@@ -127,5 +153,18 @@
 
         });
     }
+
+    function printAndHide() {
+            // Ẩn các nút khi nhấn "Xuất thông tin"
+            document.getElementById('print-btn').style.display = 'none';
+
+            // Gọi chức năng in
+            window.print();
+
+            // Hiện lại các nút sau khi in (tuỳ chọn)
+            setTimeout(() => {
+                document.getElementById('print-btn').style.display = 'inline-block';
+            }, 1000);
+        }
 </script>
 {% endblock %}

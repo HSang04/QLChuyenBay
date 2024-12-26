@@ -12,8 +12,9 @@ from wtforms.fields.choices import SelectMultipleField
 from wtforms.fields.numeric import IntegerField
 from wtforms.validators import DataRequired
 from cbapp import app, db
-from cbapp.dao import get_doanh_thu_tuyen_bay_theo_thang, get_so_luong_user, get_so_chuyen_bay_theo_thang, \
-    get_so_ve_nhan_vien_ban_theo_thang, get_doanh_thu_theo_nam
+from cbapp.dao import get_doanh_thu_tuyen_bay_theo_thang, get_so_luong_user, \
+    get_so_ve_nhan_vien_ban_theo_thang, get_doanh_thu_theo_nam, get_so_chuyen_bay_cua_tuyen_bay_theo_thang, \
+    get_so_luong_tong_quat
 from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe, Ve, HangVe
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
@@ -21,9 +22,10 @@ from wtforms import SelectField
 
 
 class QLCBAdminIndexView(AdminIndexView):
+
     @expose('/')
     def index(self):
-        return self.render('admin/index.html', so_luong_user=get_so_luong_user())
+        return self.render('admin/index.html', so_luong_user=get_so_luong_user(), so_luong_tong_quat=get_so_luong_tong_quat())
 
 
 
@@ -361,7 +363,7 @@ def lay_doanh_thu_tuyen_bay_theo_thang():
 
     # Lấy dữ liệu doanh thu và số chuyến bay
     doanh_thu_tuyen_bay = get_doanh_thu_tuyen_bay_theo_thang(month, year)
-    so_chuyen_bay = get_so_chuyen_bay_theo_thang(month, year)
+    so_chuyen_bay = get_so_chuyen_bay_cua_tuyen_bay_theo_thang(month, year)
 
     # Chuyển so_chuyen_bay thành dictionary để dễ tra cứu
     so_chuyen_bay_dict = {scb[0]: scb[1] for scb in so_chuyen_bay}

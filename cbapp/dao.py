@@ -51,7 +51,7 @@ def get_so_luong_tong_quat():
         'so_tuyen_bay': so_tuyen_bay,
         'so_chuyen_bay': so_chuyen_bay
     }
-    return
+    return result
 
 
 def get_doanh_thu_tuyen_bay():
@@ -67,12 +67,12 @@ def get_doanh_thu_tuyen_bay_theo_thang(month=datetime.now().month, year=datetime
             .filter(func.extract('month', Ve.ngayTaoVe).__eq__(month) and func.extract('year', Ve.ngayTaoVe).__eq__(year)).all()
 
 
-def get_so_chuyen_bay():
+def get_so_chuyen_bay_cua_tuyen_bay():
     return db.session.query(TuyenBay.maTuyenBay, func.count(ChuyenBay.maTuyenBay)).outerjoin(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay))\
             .group_by(TuyenBay.maTuyenBay).all()
 
 
-def get_so_chuyen_bay_theo_thang(month=datetime.now().month, year=datetime.now().year):
+def get_so_chuyen_bay_cua_tuyen_bay_theo_thang(month=datetime.now().month, year=datetime.now().year):
     return db.session.query(TuyenBay.maTuyenBay, func.count(ChuyenBay.maTuyenBay)).outerjoin(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay))\
             .group_by(TuyenBay.maTuyenBay).filter(func.extract('month', ChuyenBay.gioDi).__eq__(month) and func.extract('year', ChuyenBay.gioDi).__eq__(year)).all()
 
