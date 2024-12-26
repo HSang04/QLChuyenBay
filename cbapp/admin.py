@@ -241,8 +241,7 @@ class ChuyenBayAdmin(AdminView):
         if not may_bay:
             raise ValidationError("Vui lòng chọn máy bay.")
 
-        print("gio_di:", gio_di)  # In ra thời gian đi lấy từ form
-        print("thoi_gian_bay:", thoi_gian_bay)  # In thời gian bay lấy từ form
+
 
         gio_den = gio_di + timedelta(minutes=thoi_gian_bay)
         model.gioDen = gio_den
