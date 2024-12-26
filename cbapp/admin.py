@@ -189,17 +189,14 @@ class MayBayAdmin(AdminView):
             raise ValidationError("Tổng số ghế không khớp với ghế hạng 1 + ghế hạng 2")
 
 
-
-
-
 class ChuyenBayAdmin(AdminView):
     column_list = ['maChuyenBay', 'tuyenBay', 'gioDi', 'gioDen', 'mayBay']
-    column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến', mayBay='Máy Bay', thoiGianBay ='Thời gian bay ( DỰ KIẾN )')
+    column_labels = dict(maChuyenBay='Mã Chuyến Bay', tuyenBay='Tuyến Bay', gioDi='Giờ Đi', gioDen='Giờ Đến',
+                         mayBay='Máy Bay', thoiGianBay='Thời gian bay ( DỰ KIẾN )')
     column_searchable_list = ['maChuyenBay']
     form_columns = ['tuyenBay', 'gioDi', 'thoiGianBay', 'mayBay']
 
     can_export = True
-
 
     column_formatters = {
         'tuyenBay': lambda v, c, m, p: m.tuyenBay.tenTuyenBay if m.tuyenBay else '',
@@ -236,12 +233,15 @@ class ChuyenBayAdmin(AdminView):
         # Kiểm tra giá trị hợp lệ của gioDi và thoiGianBay
         if not gio_di:
             raise ValidationError("Vui lòng chọn giờ đi.")
+
+        # Kiểm tra gioDi phải lớn hơn thời điểm hiện tại
+        if gio_di <= datetime.now():
+            raise ValidationError("Giờ đi phải sau hơn thời điểm hiện tại.")
+
         if thoi_gian_bay is None or thoi_gian_bay <= 0:
             raise ValidationError("Vui lòng nhập thời gian bay hợp lệ (lớn hơn 0).")
         if not may_bay:
             raise ValidationError("Vui lòng chọn máy bay.")
-
-
 
         gio_den = gio_di + timedelta(minutes=thoi_gian_bay)
         model.gioDen = gio_den
@@ -281,7 +281,6 @@ class ChuyenBayAdmin(AdminView):
         db.session.commit()
 
         return super(ChuyenBayAdmin, self).on_model_change(form, model, is_created)
-
 
 class VeAdmin(AdminView):
     column_list = ['maVe', 'tinhTrangVe', 'giaVe', 'maChuyenBay', 'maHangVe', 'maGhe', 'tenKhachHang']
