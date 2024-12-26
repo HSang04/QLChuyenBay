@@ -13,7 +13,7 @@ from wtforms.fields.numeric import IntegerField
 from wtforms.validators import DataRequired
 from cbapp import app, db
 from cbapp.dao import get_doanh_thu_tuyen_bay_theo_thang, get_so_luong_user, get_so_chuyen_bay_theo_thang, \
-    get_so_ve_nhan_vien_ban_theo_thang
+    get_so_ve_nhan_vien_ban_theo_thang, get_doanh_thu_theo_nam
 from cbapp.models import NhanVien, KhachHang, ChuyenBay, TuyenBay, SanBay, MayBay, VaiTro, Ghe, Ve, HangVe
 from wtforms.validators import ValidationError
 from flask_admin.contrib.sqla import ModelView
@@ -404,6 +404,27 @@ def lay_thong_ke_nhan_vien_theo_thang():
             "id": ma_nhan_vien,
             "tenNhanVien": ten_nhan_vien,
             "soVeBan": so_ve_ban,
+            "doanhThu": doanh_thu
+        })
+
+    return jsonify(data)
+
+
+@app.route('/api/doanh-thu-theo-nam', methods=['get'])
+@login_required
+def lay_doanh_thu_theo_nam():
+    year = request.args.get('year') if request.args.get('year') else datetime.now().year
+
+    # Lấy dữ liệu doanh thu
+    doanh_thu = get_doanh_thu_theo_nam(year)
+
+    data = []
+    for dt in doanh_thu:
+        thang = dt[0]
+        doanh_thu = round(dt[1])
+
+        data.append({
+            "thang": thang,
             "doanhThu": doanh_thu
         })
 

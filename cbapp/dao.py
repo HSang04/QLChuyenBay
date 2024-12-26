@@ -3,7 +3,8 @@ from calendar import month
 from flask_login import current_user
 from sqlalchemy import func
 from sqlalchemy.sql.functions import count
-from cbapp.models import NhanVien, KhachHang, SanBay, TuyenBay, ChuyenBay, Ve, LichSuGiaoDich, Ghe, HangVe, VaiTro
+from cbapp.models import NhanVien, KhachHang, SanBay, TuyenBay, ChuyenBay, Ve, LichSuGiaoDich, Ghe, HangVe, VaiTro, \
+    MayBay
 from cbapp import db, app
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
@@ -41,6 +42,18 @@ def get_so_luong_user():
     return result
 
 
+def get_so_luong_tong_quat():
+    so_may_bay = db.session.query(func.count(MayBay.maMayBay)).scalar()
+    so_tuyen_bay = db.session.query(func.count(TuyenBay.maTuyenBay)).scalar()
+    so_chuyen_bay = db.session.query(func.count(ChuyenBay.maChuyenBay)).scalar()
+    result = {
+        'so_may_bay': so_may_bay,
+        'so_tuyen_bay': so_tuyen_bay,
+        'so_chuyen_bay': so_chuyen_bay
+    }
+    return
+
+
 def get_doanh_thu_tuyen_bay():
     return db.session.query(TuyenBay.maTuyenBay, TuyenBay.tenTuyenBay, func.sum(Ve.giaVe))\
             .join(ChuyenBay, TuyenBay.maTuyenBay.__eq__(ChuyenBay.maTuyenBay)).join(Ve, ChuyenBay.maChuyenBay.__eq__(Ve.maChuyenBay))\
@@ -76,6 +89,18 @@ def get_so_ve_nhan_vien_ban_theo_thang(month=datetime.now().month, year=datetime
             .group_by(NhanVien.maNhanVien)\
             .filter(func.extract('month', Ve.ngayTaoVe).__eq__(month) and func.extract('year', Ve.ngayTaoVe).__eq__(year)).all()
 
+
+def get_doanh_thu():
+    return db.session.query(func.sum(Ve.giaVe)).all()
+
+
+def get_doanh_thu_theo_nam(year=datetime.now().year):
+    return db.session.query(func.extract('month', Ve.ngayTaoVe), func.sum(Ve.giaVe))\
+            .group_by(func.extract('month', Ve.ngayTaoVe))\
+            .filter(func.extract('year', Ve.ngayTaoVe).__eq__(year))\
+            .order_by(func.extract('month', Ve.ngayTaoVe)).all()
+
+
 def get_user_info():
     user_info = {
         'username': current_user.taiKhoan,
@@ -87,4 +112,4 @@ def get_user_info():
     return user_info
 if __name__ == '__main__':
     with app.app_context():
-        print(get_so_ve_nhan_vien_ban_theo_thang())
+        print(get_doanh_thu_theo_nam())
