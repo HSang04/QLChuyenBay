@@ -28,6 +28,7 @@
                         <th scope="col">Trạng Thái</th>
                         <th scope="col">Tên Khách Hàng</th>
                         <th scope="col">Số Điện Thoại</th>
+                        <th scope="col">Hành Động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -54,6 +55,13 @@
                                 {{ item.khachHang.soDienThoai }}
                             {% else %}
                                 <span class="text-muted">Trống</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if item.ve and item.ve.tinhTrangVe != "Đã hủy" %}
+                                <form action="{{ url_for('huy_ve_nhanvien', ve_id=item.ve.maVe) }}" method="POST">
+                                    <button type="submit" class="btn btn-danger btn-sm">Hủy Vé</button>
+                                </form>
                             {% endif %}
                         </td>
                     </tr>

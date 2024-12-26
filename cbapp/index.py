@@ -538,11 +538,17 @@ def tracuu_chuyen_bay():
 @app.route('/xem-chuyen-bay/<int:maChuyenBay>')
 @login_required
 def xem_chuyen_bay(maChuyenBay):
+    # Lấy thông tin chuyến bay theo maChuyenBay
     chuyen_bay = ChuyenBay.query.get_or_404(maChuyenBay)
-    ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).filter(Ve.tinhTrangVe != "Đã hủy").all()
-    ghe_ve_info = []
-    for ghe in chuyen_bay.ghe:
 
+    # Lấy danh sách vé của chuyến bay
+    ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).filter(Ve.tinhTrangVe != "Đã hủy").all()
+
+    ghe_ve_info = []
+
+    # Duyệt qua từng ghế trong chuyến bay
+    for ghe in chuyen_bay.ghe:
+        # Tìm vé liên quan đến ghế
         ve = next((v for v in ve_list if v.maGhe == ghe.maGhe), None)
 
         if ve and ghe.trangThai == 1:  # Nếu vé tồn tại và ghế đã được đặt
@@ -560,7 +566,35 @@ def xem_chuyen_bay(maChuyenBay):
             've': ve,
             'khachHang': khach_hang
         })
+
     return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
+
+
+@app.route('/huy-ve/<int:ve_id>', methods=['POST'])
+@login_required
+def huy_ve_nhanvien(ve_id):
+    # Lấy đối tượng vé từ cơ sở dữ liệu
+    ve = Ve.query.get_or_404(ve_id)
+
+
+    chuyen_bay = ve.chuyenBay
+
+    time_difference = chuyen_bay.gioDi - datetime.now()
+
+
+    if time_difference < timedelta(hours=4):
+        flash('Không thể hủy vé vì thời gian còn lại ít hơn 4 giờ.', 'danger')
+        return redirect(url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay))
+
+    ve.tinhTrangVe = 'Đã hủy'
+
+    ghe = Ghe.query.filter_by(maChuyenbay=chuyen_bay.maChuyenBay, maGhe=ve.maGhe).first()
+    if ghe:
+        ghe.trangThai = False
+
+    db.session.commit()
+    flash('Vé đã được hủy thành công.', 'success')
+    return redirect(url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay))
 
 
 @app.route('/hien_thi_ve', methods=['GET', 'POST'])
@@ -622,9 +656,8 @@ def huy_ve(giao_dich_id):
                 ghe.trangThai = False
                 db.session.commit()
                 flash("Vé đã được hủy thành công!", "success")
-                ve = Ve.query.filter_by(maChuyenBay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).first()
+                ve = Ve.query.filter_by(maChuyenBay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).filter(Ve.tinhTrangVe != 'Đã hủy').first()
                 if ve:
-                    # Cập nhật trạng thái vé thành "Đã hủy"
                     ve.tinhTrangVe = "Đã hủy"  # Cập nhật trạng thái vé trong bảng LichSuGiaoDich
                     db.session.commit()
             else:
