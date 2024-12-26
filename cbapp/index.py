@@ -18,6 +18,8 @@ from sqlalchemy import asc
 
 @app.route('/')
 def index():
+    logout_user()
+    session.pop('user_type', None)
     return redirect('/trangchu')
 
 @app.route('/login', methods=['GET', 'POST'])
