@@ -35,10 +35,16 @@
                         </td>
                         <td><strong class="text-success">{{ "{:,.0f}".format(giao_dich.giaVe) }} VND</strong></td>
                         <td>{{ giao_dich.thoiGianGiaoDich.strftime('%H:%M %d/%m/%Y') if giao_dich.thoiGianGiaoDich else 'N/A' }}</td>
-                        <td>{{ giao_dich.tenGhe if giao_dich.tenGhe else 'Không xác định' }}</td>
+                        <td>{{ giao_dich.ghe.tenGhe if giao_dich.ghe else 'Không xác định' }}</td> <!-- Thay đổi tại đây -->
                         <td>
                             {% if giao_dich.tinhTrangVe == 'Đã đặt' %}
                                 <span class="badge bg-success">Đã đặt</span>
+                                <!-- Nút hủy vé nếu còn hơn 72 giờ -->
+                                {% if giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi > (now + timedelta(hours=72)) %}
+                                    <form action="{{ url_for('huy_ve', giao_dich_id=giao_dich.id) }}" method="post" style="display: inline;">
+                                        <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Bạn chắc chắn muốn hủy vé này?')">Hủy vé</button>
+                                    </form>
+                                {% endif %}
                             {% elif giao_dich.tinhTrangVe == 'Đã hủy' %}
                                 <span class="badge bg-danger">Đã hủy</span>
                             {% elif giao_dich.tinhTrangVe == 'Đã sử dụng' %}

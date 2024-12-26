@@ -582,13 +582,13 @@ def hien_thi_ve():
 @app.route('/lich_su_giao_dich', methods=['GET'])
 @login_required
 def lich_su_giao_dich():
-
+    now = datetime.utcnow()  # Lấy thời gian hiện tại
     if isinstance(current_user, KhachHang):
         giao_dichs = LichSuGiaoDich.query.filter_by(maKhachHang=current_user.maKhachHang).all()
 
         # Kiểm tra và cập nhật trạng thái vé nếu cần
         for giao_dich in giao_dichs:
-            if giao_dich.tinhTrangVe == 'Đã đặt' and giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi < datetime.utcnow():
+            if giao_dich.tinhTrangVe == 'Đã đặt' and giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi < now:
                 giao_dich.tinhTrangVe = 'Đã sử dụng'
                 db.session.commit()
 
@@ -599,10 +599,47 @@ def lich_su_giao_dich():
     # Nếu không có giao dịch nào
     if not giao_dichs:
         flash("Bạn chưa có giao dịch nào.", "info")
-        return render_template('lichsugiaodich.html', giao_dichs=giao_dichs)
+        return render_template('lichsugiaodich.html', giao_dichs=giao_dichs, now=now, timedelta=timedelta)
 
     # Trả về trang hiển thị lịch sử giao dịch với thông tin các vé
-    return render_template('lichsugiaodich.html', giao_dichs=giao_dichs)
+    return render_template('lichsugiaodich.html', giao_dichs=giao_dichs, now=now, timedelta=timedelta)
+
+@app.route('/huy_ve/<int:giao_dich_id>', methods=['POST'])
+@login_required
+def huy_ve(giao_dich_id):
+    if isinstance(current_user, KhachHang):
+        giao_dich = LichSuGiaoDich.query.get(giao_dich_id)
+
+        if not giao_dich or giao_dich.maKhachHang != current_user.maKhachHang:
+            flash("Giao dịch không hợp lệ.", "danger")
+            return redirect(url_for('lich_su_giao_dich'))
+
+
+        if giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi > datetime.utcnow() + timedelta(hours=72):
+            giao_dich.tinhTrangVe = 'Đã hủy'
+
+
+            ghe = Ghe.query.filter_by(maChuyenbay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).first()
+            if ghe:
+                ghe.trangThai = False
+                db.session.commit()
+                flash("Vé đã được hủy thành công!", "success")
+                ve = Ve.query.filter_by(maChuyenBay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).first()
+                if ve:
+                    # Cập nhật trạng thái vé thành "Đã hủy"
+                    ve.tinhTrangVe = "Đã hủy"  # Cập nhật trạng thái vé trong bảng LichSuGiaoDich
+                    db.session.commit()
+            else:
+                flash("Không tìm thấy ghế tương ứng với giao dịch.", "danger")
+                db.session.rollback()
+
+        else:
+            flash("Bạn không thể hủy vé vì còn ít hơn 72 giờ trước giờ bay.", "danger")
+
+        return redirect(url_for('lich_su_giao_dich'))
+    else:
+        flash("Bạn không có quyền thực hiện thao tác này.", "danger")
+        return redirect(url_for('index'))
 
 
 @app.route('/hoso')

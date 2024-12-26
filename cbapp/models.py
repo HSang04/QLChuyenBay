@@ -216,13 +216,16 @@ class LichSuGiaoDich(db.Model):
     giaVe = db.Column(db.Float, nullable=False)
     tinhTrangVe = db.Column(db.String(50), default='Đã đặt')
     thoiGianGiaoDich = db.Column(db.DateTime, default=datetime.utcnow)
-    tenGhe = db.Column(db.String(50), nullable=False)
+    maGhe = db.Column(db.Integer, db.ForeignKey('ghe.maGhe'), nullable=False)  # Lưu maGhe thay vì tenGhe
 
     # Tham chiếu tới khách hàng (để tránh lặp lại thông tin)
     khachHang = db.relationship('KhachHang', backref=db.backref('lichSuGiaoDichs', lazy=True))
 
     # Tham chiếu tới chuyến bay
     chuyenBay = db.relationship('ChuyenBay', backref=db.backref('lichSuGiaoDichs', lazy=True))
+
+    # Quan hệ với ghế, lấy thông tin về ghế khi cần
+    ghe = db.relationship('Ghe', backref=db.backref('lichSuGiaoDichs', lazy=True))
 
     def __repr__(self):
         return f'<LichSuGiaoDich {self.id}, KhachHang {self.maKhachHang}, ChuyenBay {self.maChuyenBay}>'

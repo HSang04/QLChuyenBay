@@ -36,7 +36,7 @@
                         <td class="fw-semibold">{{ item.tenGhe }}</td>
                         <td>{{ item.hangGhe }}</td>
                         <td>
-                            {% if item.ve %}
+                            {% if item.ve and item.ve.tinhTrangVe != "Đã hủy" %}
                                 <span class="badge bg-success">Đã Đặt</span>
                             {% else %}
                                 <span class="badge bg-warning text-dark">Còn Trống</span>
