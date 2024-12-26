@@ -328,7 +328,7 @@ def thanh_toan():
                     maChuyenBay=chuyenBay.maChuyenBay,
                     maKhachHang=current_user.maKhachHang,
                     loaiVe=loai_ve,   soLuongVe=so_luong_ve,    giaVe=gia_ve,
-                    tinhTrangVe='Đã đặt',  thoiGianGiaoDich = datetime.now(),  tenGhe = ghe_con_lai.tenGhe  )
+                    tinhTrangVe='Đã đặt',  thoiGianGiaoDich = datetime.now(),  maGhe = ghe_con_lai.maGhe  )
                 db.session.add(giao_dich)
                 db.session.commit()
             session.pop('dat_ve', None)
@@ -341,9 +341,6 @@ def thanh_toan():
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
 
-from datetime import datetime, timedelta
-from flask import redirect, render_template, request
-from flask_login import login_required, current_user
 
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
