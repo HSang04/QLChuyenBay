@@ -178,7 +178,7 @@ class SanBayAdmin(AdminView):
 
 class MayBayAdmin(AdminView):
     column_list = ['maMayBay', 'tenMayBay', 'tongSoGhe']
-    column_labels = dict(maMayBay='Mã Máy Bay', tenMayBay='Tên Máy Bay', tongSoGhe='Tổng Số Ghế')
+    column_labels = dict(maMayBay='Mã Máy Bay', tenMayBay='Tên Máy Bay', tongSoGhe='Tổng Số Ghế', gheHang1='Ghế hạng 1', gheHang2='Ghế hạng 2')
     column_searchable_list = ['tenMayBay']
     form_columns = ['tenMayBay', 'tongSoGhe', 'gheHang1', 'gheHang2']
     can_export = True
