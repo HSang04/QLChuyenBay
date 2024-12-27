@@ -1,18 +1,11 @@
-from datetime import timedelta
-
-import pytz
-from apscheduler.schedulers.background import BackgroundScheduler
 from flask import Flask, render_template, request, redirect, flash, url_for, session, current_app
 from flask_login import LoginManager, login_user, logout_user, current_user, login_required
-from flask_wtf import FlaskForm
+
 
 from cbapp import app, dao, login, db, create_db
 from cbapp.dao import get_user_info
 from cbapp.forms import ChangePasswordForm, ChangeInfoForm
 from cbapp.models import KhachHang, NhanVien, Ve, LichSuGiaoDich
-
-from wtforms.fields.simple import StringField, EmailField, PasswordField, SubmitField
-from wtforms.validators import InputRequired, Email, Length, EqualTo, DataRequired
 from sqlalchemy import asc
 
 
@@ -112,9 +105,8 @@ def dang_ky():
             cccd=form_data['cccd'],
             active=True
         )
-        khach_hang_moi.set_password(matKhau)  # Mã hóa mật khẩu
+        khach_hang_moi.set_password(matKhau)
 
-        # Lưu vào cơ sở dữ liệu
         try:
             db.session.add(khach_hang_moi)
             db.session.commit()
@@ -169,7 +161,6 @@ def trangchu():
     return render_template('trangchu.html', sanBays=sanBays, chuyenBays=chuyenBays,
                            chuyenBayDeXuat=chuyenBayDeXuat)
 
-
 @app.route('/tim-chuyen-bay', methods=['GET', 'POST'])
 def tim_chuyen_bay():
     sanBays = SanBay.query.all()
@@ -180,14 +171,11 @@ def tim_chuyen_bay():
         sanBayDen = request.form['sanBayDen']
         ngayDi = request.form['ngayDi']
 
-
         session['form_data'] = {
             'sanBayDi': sanBayDi,
             'sanBayDen': sanBayDen,
             'ngayDi': ngayDi
         }
-
-
         current_time = datetime.now()
         min_time = current_time + timedelta(hours=12)
         chuyenBays = ChuyenBay.query.join(TuyenBay).filter(
@@ -213,11 +201,9 @@ def dat_ve(ma_chuyen_bay):
     soGheThuongGiaConLai = len([ghe for ghe in gheThuongGia if ghe.trangThai == False])
     soGhePhoThongConLai = len([ghe for ghe in ghePhoThong if ghe.trangThai == False])
 
-    # Tính giá vé
     gia_ve_thuong_gia = chuyenBay.tinh_gia_ve('ThuongGia', datetime.now().strftime("%d/%m/%Y %H:%M"))
     gia_ve_pho_thong = chuyenBay.tinh_gia_ve('PhoThong', datetime.now().strftime("%d/%m/%Y %H:%M"))
 
-    # Thông tin khách hàng mặc định
     ten_khach_hang = current_user.hoVaTen
     so_dien_thoai = current_user.soDienThoai
     email = current_user.email
@@ -230,7 +216,6 @@ def dat_ve(ma_chuyen_bay):
         so_dien_thoai = request.form.get('so_dien_thoai') or so_dien_thoai
         email = request.form.get('email') or email
 
-
         session['dat_ve'] = {
             'ma_chuyen_bay': ma_chuyen_bay,
             'so_luong_ve': so_luong_ve,
@@ -240,9 +225,7 @@ def dat_ve(ma_chuyen_bay):
             'email': email,
             'gia_ve_thuong_gia': gia_ve_thuong_gia,
             'gia_ve_pho_thong': gia_ve_pho_thong
-
         }
-
 
         if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
             flash('Thất bại: Không đủ ghế Thương Gia.', 'danger')
@@ -293,7 +276,6 @@ def thanh_toan():
             gia_ve_pho_thong = dat_ve['gia_ve_pho_thong']
             cccd = current_user.cccd
 
-
             gia_ve = gia_ve_thuong_gia if loai_ve == 'ThuongGia' else gia_ve_pho_thong
             total_price = gia_ve * so_luong_ve
 
@@ -327,12 +309,9 @@ def thanh_toan():
         return redirect(url_for('hien_thi_ve', ma_chuyen_bay=ma_chuyen_bay, total_price=total_price,
                                 loai_ve=loai_ve, so_luong_ve=so_luong_ve))
 
-
     chuyenBay = ChuyenBay.query.get_or_404(ma_chuyen_bay)
-
     return render_template('thanhtoan.html', chuyenBay=chuyenBay,
                            total_price=total_price, loai_ve=loai_ve, so_luong_ve=so_luong_ve)
-
 
 @app.route('/banve/tim-chuyen-bay', methods=['GET', 'POST'])
 @login_required
@@ -383,7 +362,6 @@ def ban_ve(ma_chuyen_bay):
         email = request.form['email']
         cccd = request.form['cccd']
 
-
         if loai_ve == 'ThuongGia' and so_luong_ve > soGheThuongGiaConLai:
             flash('Thất bại: Không đủ ghế Thương Gia.', 'danger')
             return redirect(url_for('ban_ve', ma_chuyen_bay=ma_chuyen_bay))
@@ -403,11 +381,9 @@ def ban_ve(ma_chuyen_bay):
         total_price = gia_ve * so_luong_ve
         ma_nhan_vien = current_user.maNhanVien
 
-
         ve_ids = []
         for _ in range(so_luong_ve):
             ghe_con_lai = Ghe.query.filter_by(maChuyenbay=chuyenBay.maChuyenBay, hangGhe=loai_ve, trangThai=False).first()
-
 
             if not ghe_con_lai:
                 ghe_con_lai = Ghe(maMayBay=chuyenBay.maMayBay, hangGhe=loai_ve, trangThai=False, maChuyenbay=chuyenBay.maChuyenBay)
@@ -530,17 +506,12 @@ def tracuu_chuyen_bay():
 @app.route('/xem-chuyen-bay/<int:maChuyenBay>')
 @login_required
 def xem_chuyen_bay(maChuyenBay):
-    # Lấy thông tin chuyến bay theo maChuyenBay
     chuyen_bay = ChuyenBay.query.get_or_404(maChuyenBay)
 
-    # Lấy danh sách vé của chuyến bay
     ve_list = Ve.query.filter_by(maChuyenBay=maChuyenBay).filter(Ve.tinhTrangVe != "Đã hủy").all()
-
     ghe_ve_info = []
 
-    # Duyệt qua từng ghế trong chuyến bay
     for ghe in chuyen_bay.ghe:
-        # Tìm vé liên quan đến ghế
         ve = next((v for v in ve_list if v.maGhe == ghe.maGhe), None)
 
         if ve and ghe.trangThai == 1:  # Nếu vé tồn tại và ghế đã được đặt
@@ -549,14 +520,11 @@ def xem_chuyen_bay(maChuyenBay):
                 'soDienThoai': ve.soDienThoai
             }
         else:
-            khach_hang = None  # Ghế trống hoặc chưa có vé đặt
+            khach_hang = None
 
         ghe_ve_info.append({
-            'tenGhe': ghe.tenGhe,
-            'maGhe': ghe.maGhe,
-            'hangGhe': ghe.hangGhe,
-            've': ve,
-            'khachHang': khach_hang
+            'tenGhe': ghe.tenGhe, 'maGhe': ghe.maGhe, 'hangGhe': ghe.hangGhe,
+            've': ve,  'khachHang': khach_hang
         })
 
     return render_template('xemchuyenbay.html', chuyen_bay=chuyen_bay, ghe_ve_info=ghe_ve_info)
@@ -607,11 +575,10 @@ def hien_thi_ve():
 @app.route('/lich_su_giao_dich', methods=['GET'])
 @login_required
 def lich_su_giao_dich():
-    now = datetime.utcnow()  # Lấy thời gian hiện tại
+    now = datetime.utcnow()
     if isinstance(current_user, KhachHang):
         giao_dichs = LichSuGiaoDich.query.filter_by(maKhachHang=current_user.maKhachHang).all()
 
-        # Kiểm tra và cập nhật trạng thái vé nếu cần
         for giao_dich in giao_dichs:
             if giao_dich.tinhTrangVe == 'Đã đặt' and giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi < now:
                 giao_dich.tinhTrangVe = 'Đã sử dụng'
@@ -621,12 +588,10 @@ def lich_su_giao_dich():
         flash("Bạn không có quyền truy cập lịch sử giao dịch!", "danger")
         return redirect(url_for('index'))
 
-    # Nếu không có giao dịch nào
     if not giao_dichs:
         flash("Bạn chưa có giao dịch nào.", "info")
         return render_template('lichsugiaodich.html', giao_dichs=giao_dichs, now=now, timedelta=timedelta)
 
-    # Trả về trang hiển thị lịch sử giao dịch với thông tin các vé
     return render_template('lichsugiaodich.html', giao_dichs=giao_dichs, now=now, timedelta=timedelta)
 
 @app.route('/huy_ve/<int:giao_dich_id>', methods=['POST'])
@@ -639,11 +604,8 @@ def huy_ve(giao_dich_id):
             flash("Giao dịch không hợp lệ.", "danger")
             return redirect(url_for('lich_su_giao_dich'))
 
-
         if giao_dich.chuyenBay.gioDi and giao_dich.chuyenBay.gioDi > datetime.utcnow() + timedelta(hours=72):
             giao_dich.tinhTrangVe = 'Đã hủy'
-
-
             ghe = Ghe.query.filter_by(maChuyenbay=giao_dich.maChuyenBay, maGhe=giao_dich.maGhe).first()
             if ghe:
                 ghe.trangThai = False
@@ -677,8 +639,6 @@ def currency_format(value):
     if isinstance(value, str):
         value = float(value)
     return "{:,.0f}".format(value)
-
-
 
 if __name__ == '__main__':
     from cbapp.admin import *

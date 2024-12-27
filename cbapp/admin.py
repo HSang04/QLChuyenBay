@@ -209,7 +209,7 @@ class ChuyenBayAdmin(AdminView):
         'tuyenBay': QuerySelectField,
         'mayBay': QuerySelectField,
         'gioDi': DateTimeField,
-        'thoiGianBay': IntegerField,  # Nhập thời gian bay (phút)
+        'thoiGianBay': IntegerField,
     }
 
     form_args = {
@@ -230,11 +230,9 @@ class ChuyenBayAdmin(AdminView):
         thoi_gian_bay = form.thoiGianBay.data
         may_bay = form.mayBay.data
 
-        # Kiểm tra giá trị hợp lệ của gioDi và thoiGianBay
         if not gio_di:
             raise ValidationError("Vui lòng chọn giờ đi.")
 
-        # Kiểm tra gioDi phải lớn hơn thời điểm hiện tại
         if gio_di <= datetime.now():
             raise ValidationError("Giờ đi phải sau hơn thời điểm hiện tại.")
 
@@ -259,20 +257,19 @@ class ChuyenBayAdmin(AdminView):
         model.mayBay = may_bay
         model.thoiGianBay = thoi_gian_bay
 
-        db.session.add(model)  # Thực hiện add model
-        db.session.commit()  # Commit giá trị
+        db.session.add(model)
+        db.session.commit()
 
-        tong_so_ghe = may_bay.tongSoGhe  # Tổng số ghế của máy bay
-        ghe_thuong_gia = may_bay.gheHang1  # Số ghế hạng Thương Gia
-        ghe_pho_thong = may_bay.gheHang2  # Số ghế hạng Phổ Thông
+        tong_so_ghe = may_bay.tongSoGhe
+        ghe_thuong_gia = may_bay.gheHang1
+        ghe_pho_thong = may_bay.gheHang2
 
-        # Tạo ghế hạng Thương Gia
+
         for i in range(ghe_thuong_gia):
             ghe = Ghe(tenGhe=f"{may_bay.tenMayBay}-{i + 1}", maChuyenbay=model.maChuyenBay, hangGhe='ThuongGia',
                       trangThai=False, maMayBay=may_bay.maMayBay)  # Ghế trống
             db.session.add(ghe)
 
-        # Tạo ghế hạng Phổ Thông
         for i in range(ghe_pho_thong):
             ghe = Ghe(tenGhe=f"{may_bay.tenMayBay}-{i + ghe_thuong_gia + 1}", maChuyenbay=model.maChuyenBay,
                       hangGhe='PhoThong', trangThai=False, maMayBay=may_bay.maMayBay)  # Ghế trống

@@ -1,4 +1,3 @@
-# models.py
 import pytz
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -10,7 +9,6 @@ from datetime import date, datetime, timedelta
 from enum import Enum as RoleEnum, unique
 
 from cbapp import app, db, create_db
-
 
 class VaiTro(RoleEnum):
     QUANTRI = 'Quản trị'
@@ -113,8 +111,8 @@ class Ghe(db.Model):
     __tablename__ = 'ghe'
     maGhe = db.Column(db.Integer, primary_key=True, autoincrement=True)
     tenGhe = db.Column(db.String(50), nullable=False)
-    trangThai = db.Column(db.Boolean, nullable=False)  # Status of the seat (available or booked)
-    hangGhe = db.Column(db.String(50), nullable=False)  # Class of seat (economy, business, etc.)
+    trangThai = db.Column(db.Boolean, nullable=False)
+    hangGhe = db.Column(db.String(50), nullable=False)
     maMayBay = db.Column(db.Integer, db.ForeignKey('maybay.maMayBay'), nullable=False)
     maChuyenbay = db.Column(db.Integer, db.ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
 
@@ -195,16 +193,16 @@ class Ve(db.Model):
     tinhTrangVe = Column(String(50), nullable=False)
     giaVe = Column(Double, nullable=False)
     maChuyenBay = Column(Integer, ForeignKey('chuyenbay.maChuyenBay'), nullable=False)
-    maKhachHang = Column(Integer, ForeignKey('khachhang.maKhachHang'), nullable=True)  # Để nullable cho đặt vé
+    maKhachHang = Column(Integer, ForeignKey('khachhang.maKhachHang'), nullable=True)
     maGhe = Column(Integer, ForeignKey('ghe.maGhe'), nullable=False)
     maHangVe = Column(Integer, ForeignKey('hangve.maHangVe'), nullable=False)
     maNhanVien = Column(Integer, ForeignKey('nhanvien.maNhanVien'), nullable=True)
 
-    # Thêm các trường để lưu thông tin khách hàng khi bán vé
-    tenKhachHang = Column(String(100), nullable=True)  # Có thể bỏ trống
-    soDienThoai = Column(String(15), nullable=True)  # Có thể bỏ trống
-    email = Column(String(100), nullable=True)  # Có thể bỏ trống
-    cccd = Column(String(20), nullable=True)  # Thêm trường CCCD
+    # Thêm các trường để lưu thông tin khách hàng khi nhaan vien bán vé
+    tenKhachHang = Column(String(100), nullable=True)
+    soDienThoai = Column(String(15), nullable=True)
+    email = Column(String(100), nullable=True)
+    cccd = Column(String(20), nullable=True)
 
 class LichSuGiaoDich(db.Model):
     __tablename__ = 'lichsugiaodich'
@@ -216,15 +214,12 @@ class LichSuGiaoDich(db.Model):
     giaVe = db.Column(db.Float, nullable=False)
     tinhTrangVe = db.Column(db.String(50), default='Đã đặt')
     thoiGianGiaoDich = db.Column(db.DateTime, default=datetime.utcnow)
-    maGhe = db.Column(db.Integer, db.ForeignKey('ghe.maGhe'), nullable=False)  # Lưu maGhe thay vì tenGhe
+    maGhe = db.Column(db.Integer, db.ForeignKey('ghe.maGhe'), nullable=False)
 
-    # Tham chiếu tới khách hàng (để tránh lặp lại thông tin)
     khachHang = db.relationship('KhachHang', backref=db.backref('lichSuGiaoDichs', lazy=True))
 
-    # Tham chiếu tới chuyến bay
     chuyenBay = db.relationship('ChuyenBay', backref=db.backref('lichSuGiaoDichs', lazy=True))
 
-    # Quan hệ với ghế, lấy thông tin về ghế khi cần
     ghe = db.relationship('Ghe', backref=db.backref('lichSuGiaoDichs', lazy=True))
 
     def __repr__(self):
@@ -289,7 +284,6 @@ if __name__ == '__main__':
         hangve_thuong_gia = HangVe(tenHangVe='Thương Gia')
         hangve_pho_thong = HangVe(tenHangVe='Phổ Thông')
 
-        # Thêm vào session và commit
         db.session.add_all([hangve_thuong_gia, hangve_pho_thong])
 
         db.session.commit()
