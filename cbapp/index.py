@@ -18,8 +18,6 @@ from sqlalchemy import asc
 
 @app.route('/')
 def index():
-    # logout_user()
-    # session.pop('user_type', None)
     return redirect('/trangchu')
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -33,11 +31,6 @@ def login_process():
 
         if user:
             login_user(user)
-
-            app.logger.info(f"Login successful! Current user: {current_user}")
-            app.logger.info(f"User ID: {current_user.get_id()}")
-            app.logger.info(f"Username: {current_user.get_username()}")
-            app.logger.info(f"User Email: {current_user.email}")
 
             if isinstance(user, KhachHang):
                 session['user_type'] = 1
@@ -572,15 +565,10 @@ def xem_chuyen_bay(maChuyenBay):
 @app.route('/huy-ve/<int:ve_id>', methods=['POST'])
 @login_required
 def huy_ve_nhanvien(ve_id):
-    # Lấy đối tượng vé từ cơ sở dữ liệu
+
     ve = Ve.query.get_or_404(ve_id)
-
-
     chuyen_bay = ve.chuyenBay
-
     time_difference = chuyen_bay.gioDi - datetime.now()
-
-
     if time_difference < timedelta(hours=4):
         flash('Không thể hủy vé vì thời gian còn lại ít hơn 4 giờ.', 'danger')
         return redirect(url_for('xem_chuyen_bay', maChuyenBay=chuyen_bay.maChuyenBay))
@@ -590,6 +578,12 @@ def huy_ve_nhanvien(ve_id):
     ghe = Ghe.query.filter_by(maChuyenbay=chuyen_bay.maChuyenBay, maGhe=ve.maGhe).first()
     if ghe:
         ghe.trangThai = False
+    db.session.commit()
+
+    lich_su = LichSuGiaoDich.query.filter_by(maChuyenBay=chuyen_bay.maChuyenBay, maGhe=ve.maGhe).filter(
+        LichSuGiaoDich.tinhTrangVe != 'Đã hủy').first()
+    if lich_su:
+        lich_su.tinhTrangVe = 'Đã hủy'
 
     db.session.commit()
     flash('Vé đã được hủy thành công.', 'success')
